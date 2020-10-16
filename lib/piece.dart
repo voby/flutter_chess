@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_svg/svg.dart';
 
-enum PieceColor { black, white }
-enum PieceType { king, queen, rook, bishop, knight, pawn }
+import 'engine.dart';
 
 class Piece extends StatelessWidget {
   const Piece({
     Key key,
-    @required this.type,
-    @required this.color,
+    @required this.pieceInfo,
   }) : super(key: key);
-  final PieceType type;
-  final PieceColor color;
+  final PieceInfo pieceInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +20,6 @@ class Piece extends StatelessWidget {
   }
 
   String get assetName {
-    return 'assets/${color.toString().split('.')[1]}_${type.toString().split('.')[1]}.svg';
+    return 'assets/${pieceInfo.color.toString().split('.').last}_${pieceInfo.type.toString().split('.').last}.svg';
   }
 }

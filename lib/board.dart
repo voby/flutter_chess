@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chess/piece.dart';
+import 'package:flutter_chess/init_board_state.dart';
+
+import 'engine.dart';
+import 'init_board_state.dart';
+import 'piece.dart';
 
 class Board extends StatefulWidget {
   const Board({
@@ -11,6 +15,16 @@ class Board extends StatefulWidget {
 }
 
 class _BoardState extends State<Board> {
+  BoardHistory boardHistory;
+  BoardState boardState;
+
+  @override
+  void initState() {
+    super.initState();
+    boardHistory = BoardHistory(initBoardState);
+    boardState = boardHistory.boardStates.last;
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -18,64 +32,41 @@ class _BoardState extends State<Board> {
     return Container(
       width: screenWidth,
       height: screenWidth,
-      child: Column(
-        children: getRows,
+      child: Row(
+        children: getFiles,
       ),
     );
   }
 
   final iter = List<int>.generate(8, (i) => i);
 
-  List<Widget> get getRows {
+  List<Widget> get getFiles {
     return iter.map((value) {
       return Flexible(
-        child: Row(
+        child: Column(
           children: getSquares(value),
         ),
       );
     }).toList();
   }
 
-  List<Widget> getSquares(int rowIndex) {
-    return iter.map((value) {
+  List<Widget> getSquares(int rankIndex) {
+    return iter.reversed.toList().map((fileIndex) {
       final squareColor =
-          value % 2 == rowIndex % 2 ? Colors.brown[100] : Colors.brown;
-      final pieceColor =
-          [6, 7].contains(rowIndex) ? PieceColor.white : PieceColor.black;
-      final pieceType = getPieceType(rowIndex, value);
+          fileIndex % 2 == rankIndex % 2 ? Colors.brown[100] : Colors.brown;
+      final PiecePosition piecePosition =
+          boardState.getPosition(fileIndex, rankIndex);
 
       return Flexible(
         child: Container(
-          child: [0, 1, 6, 7].contains(rowIndex)
+          child: piecePosition != null
               ? Piece(
-                  type: pieceType,
-                  color: pieceColor,
+                  pieceInfo: piecePosition.pieceInfo,
                 )
               : SizedBox.expand(),
           color: squareColor,
         ),
       );
     }).toList();
-  }
-
-  PieceType getPieceType(int rowIndex, int value) {
-    if (![1, 6].contains(rowIndex)) {
-      if ([0, 7].contains(value)) {
-        return PieceType.rook;
-      }
-      if ([1, 6].contains(value)) {
-        return PieceType.knight;
-      }
-      if ([2, 5].contains(value)) {
-        return PieceType.bishop;
-      }
-      if (value == 3) {
-        return PieceType.queen;
-      }
-      if (value == 4) {
-        return PieceType.king;
-      }
-    }
-    return PieceType.pawn;
   }
 }

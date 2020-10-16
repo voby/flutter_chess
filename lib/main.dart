@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chess/board.dart';
-import 'package:flutter_chess/board_controls.dart';
+
+import 'board.dart';
+import 'board_controls.dart';
 
 void main() {
   runApp(MyApp());
