@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chess/pawn_painter.dart';
-import 'package:flutter_chess/rook_painter.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 
 enum PieceColor { black, white }
 enum PieceType { king, queen, rook, bishop, knight, pawn }
@@ -18,22 +18,12 @@ class Piece extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox.expand(
       child: Container(
-        child: CustomPaint(
-          painter: getPainter,
-        ),
+        child: SvgPicture.asset(assetName),
       ),
     );
   }
 
-  CustomPainter get getPainter {
-    final majorColor = color == PieceColor.white ? Colors.white : Colors.black;
-    final minorColor = color == PieceColor.white ? Colors.black : Colors.white;
-
-    switch (type) {
-      case PieceType.rook:
-        return RookPainter(majorColor: majorColor, minorColor: minorColor);
-      default:
-        return PawnPainter(color: majorColor);
-    }
+  String get assetName {
+    return 'assets/${color.toString().split('.')[1]}_${type.toString().split('.')[1]}.svg';
   }
 }

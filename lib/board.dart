@@ -16,7 +16,6 @@ class _BoardState extends State<Board> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Container(
-      color: Colors.pink,
       width: screenWidth,
       height: screenWidth,
       child: Column(

@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Game #1'),
+          title: Text('Game #5'),
         ),
         backgroundColor: Colors.blueGrey,
         body: SingleChildScrollView(
