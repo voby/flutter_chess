@@ -1,7 +1,9 @@
+import 'package:equatable/equatable.dart';
+
 enum PieceColor { black, white }
 enum PieceType { king, queen, rook, bishop, knight, pawn }
-enum Rank { a, b, c, d, e, f, g, h }
-enum File { first, second, third, fourth, fifth, sixth, seventh, eighth }
+enum File { a, b, c, d, e, f, g, h }
+enum Rank { first, second, third, fourth, fifth, sixth, seventh, eighth }
 
 class Move {
   final Square from;
@@ -10,11 +12,19 @@ class Move {
   Move(this.from, this.to);
 }
 
-class Square {
-  final Rank rank;
-  final File file;
+class Square extends Equatable {
+  File file;
+  Rank rank;
 
-  const Square(this.rank, this.file);
+  Square(this.file, this.rank);
+
+  Square.fromIndexes(int fileIndex, int rankIndex) {
+    file = File.values[fileIndex];
+    rank = Rank.values[rankIndex];
+  }
+
+  @override
+  List<Object> get props => [file, rank];
 }
 
 class PieceInfo {
@@ -37,13 +47,9 @@ class BoardState {
 
   BoardState(this.piecePositions);
 
-  getPosition(int fileIndex, int rankIndex) {
-    final file = File.values[fileIndex];
-    final rank = Rank.values[rankIndex];
-
+  getPiecePosition(Square square) {
     return piecePositions.firstWhere(
-      (position) =>
-          position.square.file == file && position.square.rank == rank,
+      (position) => position.square == square,
       orElse: () => null,
     );
   }
@@ -53,4 +59,10 @@ class BoardHistory {
   final List<BoardState> boardStates;
 
   BoardHistory(initBoardState) : boardStates = [initBoardState];
+}
+
+List<Square> getValidMoves(PiecePosition position, BoardState state) {
+  return [
+    Square(File.d, Rank.fourth),
+  ];
 }

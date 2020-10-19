@@ -1,37 +1,37 @@
 import 'engine.dart';
 
-final squareA1 = Square(Rank.a, File.first);
-final squareA2 = Square(Rank.a, File.second);
-final squareA7 = Square(Rank.a, File.seventh);
-final squareA8 = Square(Rank.a, File.eighth);
-final squareB1 = Square(Rank.b, File.first);
-final squareB2 = Square(Rank.b, File.second);
-final squareB7 = Square(Rank.b, File.seventh);
-final squareB8 = Square(Rank.b, File.eighth);
-final squareC1 = Square(Rank.c, File.first);
-final squareC2 = Square(Rank.c, File.second);
-final squareC7 = Square(Rank.c, File.seventh);
-final squareC8 = Square(Rank.c, File.eighth);
-final squareD1 = Square(Rank.d, File.first);
-final squareD2 = Square(Rank.d, File.second);
-final squareD7 = Square(Rank.d, File.seventh);
-final squareD8 = Square(Rank.d, File.eighth);
-final squareE1 = Square(Rank.e, File.first);
-final squareE2 = Square(Rank.e, File.second);
-final squareE7 = Square(Rank.e, File.seventh);
-final squareE8 = Square(Rank.e, File.eighth);
-final squareF1 = Square(Rank.f, File.first);
-final squareF2 = Square(Rank.f, File.second);
-final squareF7 = Square(Rank.f, File.seventh);
-final squareF8 = Square(Rank.f, File.eighth);
-final squareG1 = Square(Rank.g, File.first);
-final squareG2 = Square(Rank.g, File.second);
-final squareG7 = Square(Rank.g, File.seventh);
-final squareG8 = Square(Rank.g, File.eighth);
-final squareH1 = Square(Rank.h, File.first);
-final squareH2 = Square(Rank.h, File.second);
-final squareH7 = Square(Rank.h, File.seventh);
-final squareH8 = Square(Rank.h, File.eighth);
+final squareA1 = Square(File.a, Rank.first);
+final squareA2 = Square(File.a, Rank.second);
+final squareA7 = Square(File.a, Rank.seventh);
+final squareA8 = Square(File.a, Rank.eighth);
+final squareB1 = Square(File.b, Rank.first);
+final squareB2 = Square(File.b, Rank.second);
+final squareB7 = Square(File.b, Rank.seventh);
+final squareB8 = Square(File.b, Rank.eighth);
+final squareC1 = Square(File.c, Rank.first);
+final squareC2 = Square(File.c, Rank.second);
+final squareC7 = Square(File.c, Rank.seventh);
+final squareC8 = Square(File.c, Rank.eighth);
+final squareD1 = Square(File.d, Rank.first);
+final squareD2 = Square(File.d, Rank.second);
+final squareD7 = Square(File.d, Rank.seventh);
+final squareD8 = Square(File.d, Rank.eighth);
+final squareE1 = Square(File.e, Rank.first);
+final squareE2 = Square(File.e, Rank.second);
+final squareE7 = Square(File.e, Rank.seventh);
+final squareE8 = Square(File.e, Rank.eighth);
+final squareF1 = Square(File.f, Rank.first);
+final squareF2 = Square(File.f, Rank.second);
+final squareF7 = Square(File.f, Rank.seventh);
+final squareF8 = Square(File.f, Rank.eighth);
+final squareG1 = Square(File.g, Rank.first);
+final squareG2 = Square(File.g, Rank.second);
+final squareG7 = Square(File.g, Rank.seventh);
+final squareG8 = Square(File.g, Rank.eighth);
+final squareH1 = Square(File.h, Rank.first);
+final squareH2 = Square(File.h, Rank.second);
+final squareH7 = Square(File.h, Rank.seventh);
+final squareH8 = Square(File.h, Rank.eighth);
 
 final whiteRookA = PieceInfo('white_rook_a', PieceColor.white, PieceType.rook);
 final whiteRookH = PieceInfo('white_rook_h', PieceColor.white, PieceType.rook);
@@ -87,10 +87,10 @@ final initBoardState = BoardState([
   PiecePosition(squareF1, whiteBishopF),
   PiecePosition(squareC8, blackBishopC),
   PiecePosition(squareF8, blackBishopF),
-  PiecePosition(squareE1, whiteQueen),
-  PiecePosition(squareE8, blackQueen),
-  PiecePosition(squareD1, whiteKing),
-  PiecePosition(squareD8, blackKing),
+  PiecePosition(squareD1, whiteQueen),
+  PiecePosition(squareD8, blackQueen),
+  PiecePosition(squareE1, whiteKing),
+  PiecePosition(squareE8, blackKing),
   PiecePosition(squareA2, whitePawnA),
   PiecePosition(squareB2, whitePawnB),
   PiecePosition(squareC2, whitePawnC),

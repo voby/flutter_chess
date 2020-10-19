@@ -18,6 +18,13 @@ class _BoardState extends State<Board> {
   BoardHistory boardHistory;
   BoardState boardState;
 
+  PieceColor side = PieceColor.white;
+
+  Square fromSquare;
+  Square toSquare;
+
+  List<Square> validMoves = [];
+
   @override
   void initState() {
     super.initState();
@@ -41,32 +48,71 @@ class _BoardState extends State<Board> {
   final iter = List<int>.generate(8, (i) => i);
 
   List<Widget> get getFiles {
-    return iter.map((value) {
+    return iter.map((fileIndex) {
       return Flexible(
         child: Column(
-          children: getSquares(value),
+          children: getSquares(fileIndex),
         ),
       );
     }).toList();
   }
 
-  List<Widget> getSquares(int rankIndex) {
-    return iter.reversed.toList().map((fileIndex) {
+  List<Widget> getSquares(int fileIndex) {
+    return iter.reversed.map((rankIndex) {
+      final square = Square.fromIndexes(fileIndex, rankIndex);
       final squareColor =
-          fileIndex % 2 == rankIndex % 2 ? Colors.brown[100] : Colors.brown;
-      final PiecePosition piecePosition =
-          boardState.getPosition(fileIndex, rankIndex);
+          fileIndex % 2 == rankIndex % 2 ? Colors.brown : Colors.brown[100];
+      final PiecePosition piecePosition = boardState.getPiecePosition(square);
+
+      final isValidMoveSquare = validMoves.contains(square);
 
       return Flexible(
-        child: Container(
-          child: piecePosition != null
-              ? Piece(
-                  pieceInfo: piecePosition.pieceInfo,
-                )
-              : SizedBox.expand(),
-          color: squareColor,
+        child: GestureDetector(
+          onTap: onSquareTap(square, piecePosition),
+          child: Container(
+            child: piecePosition != null
+                ? Piece(
+                    pieceInfo: piecePosition.pieceInfo,
+                  )
+                : SizedBox.expand(),
+            decoration: BoxDecoration(
+              color: isValidMoveSquare ? Colors.purpleAccent[100] : squareColor,
+              border: Border.all(
+                  color: square == fromSquare
+                      ? Colors.pinkAccent
+                      : square == toSquare
+                          ? Colors.greenAccent
+                          : Colors.transparent,
+                  width: 2),
+            ),
+          ),
         ),
       );
     }).toList();
+  }
+
+  Function onSquareTap(Square square, PiecePosition piecePosition) {
+    return () {
+      if (piecePosition != null && piecePosition.pieceInfo.color == side) {
+        setState(() {
+          fromSquare = square;
+          toSquare = null;
+          validMoves = getValidMoves(piecePosition, boardState);
+        });
+      } else {
+        if (toSquare == null) {
+          setState(() {
+            toSquare = square;
+            validMoves = [];
+          });
+        } else {
+          setState(() {
+            fromSquare = null;
+            toSquare = null;
+            validMoves = [];
+          });
+        }
+      }
+    };
   }
 }
