@@ -17,12 +17,8 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   BoardHistory boardHistory;
   BoardState boardState;
-
   PieceColor side = PieceColor.white;
-
   Square fromSquare;
-  Square toSquare;
-
   List<Square> validMoves = [];
 
   @override
@@ -80,9 +76,7 @@ class _BoardState extends State<Board> {
               border: Border.all(
                   color: square == fromSquare
                       ? Colors.pinkAccent
-                      : square == toSquare
-                          ? Colors.greenAccent
-                          : Colors.transparent,
+                      : Colors.transparent,
                   width: 2),
             ),
           ),
@@ -93,26 +87,25 @@ class _BoardState extends State<Board> {
 
   Function onSquareTap(Square square, PiecePosition piecePosition) {
     return () {
-      if (piecePosition != null && piecePosition.pieceInfo.color == side) {
-        setState(() {
+      setState(() {
+        if (piecePosition != null && piecePosition.pieceInfo.color == side) {
           fromSquare = square;
-          toSquare = null;
           validMoves = getValidMoves(piecePosition, boardState);
-        });
-      } else {
-        if (toSquare == null) {
-          setState(() {
-            toSquare = square;
-            validMoves = [];
-          });
-        } else {
-          setState(() {
+        } else if (fromSquare != null && validMoves.contains(square)) {
+          final fromPosition = boardState.getPiecePosition(fromSquare);
+          if (fromPosition != null) {
+            List<PiecePosition> piecePositions = boardState.piecePositions
+              ..removeWhere((position) => position == fromPosition)
+              ..add(PiecePosition(square, fromPosition.pieceInfo));
+
+            final nextState = BoardState(piecePositions);
+            boardHistory.addState(nextState);
+            boardState = nextState;
             fromSquare = null;
-            toSquare = null;
             validMoves = [];
-          });
+          }
         }
-      }
+      });
     };
   }
 }
