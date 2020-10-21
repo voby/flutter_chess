@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_chess/init_board_state.dart';
 
 import 'engine.dart';
 import 'init_board_state.dart';
+import 'move_validation.dart';
 import 'piece.dart';
 
 class Board extends StatefulWidget {
@@ -16,8 +16,8 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   BoardHistory boardHistory;
-  BoardState boardState;
-  PieceColor side = PieceColor.white;
+
+  PieceColor movingColor = PieceColor.white;
   Square fromSquare;
   List<Square> validMoves = [];
 
@@ -25,7 +25,6 @@ class _BoardState extends State<Board> {
   void initState() {
     super.initState();
     boardHistory = BoardHistory(initBoardState);
-    boardState = boardHistory.boardStates.last;
   }
 
   @override
@@ -58,7 +57,8 @@ class _BoardState extends State<Board> {
       final square = Square.fromIndexes(fileIndex, rankIndex);
       final squareColor =
           fileIndex % 2 == rankIndex % 2 ? Colors.brown : Colors.brown[100];
-      final PiecePosition piecePosition = boardState.getPiecePosition(square);
+      final PiecePosition piecePosition =
+          boardHistory.getState().getPiecePosition(square);
 
       final isValidMoveSquare = validMoves.contains(square);
 
@@ -72,7 +72,11 @@ class _BoardState extends State<Board> {
                   )
                 : SizedBox.expand(),
             decoration: BoxDecoration(
-              color: isValidMoveSquare ? Colors.purpleAccent[100] : squareColor,
+              color: isValidMoveSquare
+                  ? piecePosition != null
+                      ? Colors.redAccent
+                      : Colors.purpleAccent[100]
+                  : squareColor,
               border: Border.all(
                   color: square == fromSquare
                       ? Colors.pinkAccent
@@ -88,21 +92,29 @@ class _BoardState extends State<Board> {
   Function onSquareTap(Square square, PiecePosition piecePosition) {
     return () {
       setState(() {
-        if (piecePosition != null && piecePosition.pieceInfo.color == side) {
+        if (piecePosition != null &&
+            piecePosition.pieceInfo.color == movingColor) {
           fromSquare = square;
-          validMoves = getValidMoves(piecePosition, boardState);
-        } else if (fromSquare != null && validMoves.contains(square)) {
-          final fromPosition = boardState.getPiecePosition(fromSquare);
-          if (fromPosition != null) {
-            List<PiecePosition> piecePositions = boardState.piecePositions
-              ..removeWhere((position) => position == fromPosition)
-              ..add(PiecePosition(square, fromPosition.pieceInfo));
+          validMoves = getValidMoves(piecePosition, boardHistory.getState());
+        } else if (validMoves.contains(square)) {
+          if (fromSquare != null) {
+            final toPosition = boardHistory.getState().getPiecePosition(square);
+
+            final fromPosition =
+                boardHistory.getState().getPiecePosition(fromSquare);
+            List<PiecePosition> piecePositions =
+                boardHistory.getState().piecePositions
+                  ..removeWhere((position) => position == fromPosition)
+                  ..removeWhere((position) => position == toPosition)
+                  ..add(PiecePosition(square, fromPosition.pieceInfo));
 
             final nextState = BoardState(piecePositions);
             boardHistory.addState(nextState);
-            boardState = nextState;
             fromSquare = null;
             validMoves = [];
+            movingColor = movingColor == PieceColor.white
+                ? PieceColor.black
+                : PieceColor.white;
           }
         }
       });
