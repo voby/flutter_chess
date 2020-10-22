@@ -16,7 +16,6 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   BoardHistory boardHistory;
-
   PieceColor movingColor = PieceColor.white;
   Square fromSquare;
   List<Square> validMoves = [];
@@ -40,10 +39,8 @@ class _BoardState extends State<Board> {
     );
   }
 
-  final iter = List<int>.generate(8, (i) => i);
-
   List<Widget> get getFiles {
-    return iter.map((fileIndex) {
+    return List.generate(8, (i) => i).map((fileIndex) {
       return Flexible(
         child: Column(
           children: getSquares(fileIndex),
@@ -53,7 +50,7 @@ class _BoardState extends State<Board> {
   }
 
   List<Widget> getSquares(int fileIndex) {
-    return iter.reversed.map((rankIndex) {
+    return List.generate(8, (i) => i).reversed.map((rankIndex) {
       final square = Square.fromIndexes(fileIndex, rankIndex);
       final squareColor =
           fileIndex % 2 == rankIndex % 2 ? Colors.brown : Colors.brown[100];
@@ -91,33 +88,48 @@ class _BoardState extends State<Board> {
 
   Function onSquareTap(Square square, PiecePosition piecePosition) {
     return () {
-      setState(() {
-        if (piecePosition != null &&
-            piecePosition.pieceInfo.color == movingColor) {
-          fromSquare = square;
-          validMoves = getValidMoves(piecePosition, boardHistory.getState());
-        } else if (validMoves.contains(square)) {
-          if (fromSquare != null) {
-            final toPosition = boardHistory.getState().getPiecePosition(square);
-
-            final fromPosition =
-                boardHistory.getState().getPiecePosition(fromSquare);
-            List<PiecePosition> piecePositions =
-                boardHistory.getState().piecePositions
-                  ..removeWhere((position) => position == fromPosition)
-                  ..removeWhere((position) => position == toPosition)
-                  ..add(PiecePosition(square, fromPosition.pieceInfo));
-
-            final nextState = BoardState(piecePositions);
-            boardHistory.addState(nextState);
-            fromSquare = null;
-            validMoves = [];
-            movingColor = movingColor == PieceColor.white
-                ? PieceColor.black
-                : PieceColor.white;
-          }
+      if (piecePosition != null &&
+          piecePosition.pieceInfo.color == movingColor) {
+        if (fromSquare != square) {
+          initMove(square, piecePosition);
+        } else {
+          cancelMove();
         }
-      });
+      } else if (validMoves.contains(square)) {
+        completeMove(square);
+      }
     };
+  }
+
+  void initMove(Square square, PiecePosition piecePosition) {
+    setState(() {
+      fromSquare = square;
+      validMoves = getValidMoves(piecePosition, boardHistory.getState());
+    });
+  }
+
+  void cancelMove() {
+    setState(() {
+      fromSquare = null;
+      validMoves = [];
+    });
+  }
+
+  void completeMove(Square square) {
+    final fromPosition = boardHistory.getState().getPiecePosition(fromSquare);
+    final toPosition = boardHistory.getState().getPiecePosition(square);
+
+    List<PiecePosition> piecePositions = boardHistory.getState().piecePositions
+      ..removeWhere((position) => position == fromPosition)
+      ..removeWhere((position) => position == toPosition)
+      ..add(PiecePosition(square, fromPosition.pieceInfo));
+    boardHistory.addState(BoardState(piecePositions));
+
+    setState(() {
+      fromSquare = null;
+      validMoves = [];
+      movingColor =
+          movingColor == PieceColor.white ? PieceColor.black : PieceColor.white;
+    });
   }
 }

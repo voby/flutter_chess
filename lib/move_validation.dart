@@ -163,12 +163,13 @@ getOffsetSquareSeq(BoardState state, Square square,
   final startPosition = state.getPiecePosition(square);
   final List<Square> squares = [];
   final List<Square> possibleSquares = List.generate(
-      8,
-      (index) => getOffsetSquare(
-            square,
-            fileOffset: fileOffset == 0 ? 0 : index * fileOffset + fileOffset,
-            rankOffset: rankOffset == 0 ? 0 : index * rankOffset + rankOffset,
-          ));
+    8,
+    (index) => getOffsetSquare(
+      square,
+      fileOffset: fileOffset == 0 ? 0 : index * fileOffset + fileOffset,
+      rankOffset: rankOffset == 0 ? 0 : index * rankOffset + rankOffset,
+    ),
+  );
 
   for (Square s in possibleSquares) {
     if (isWhile) {
