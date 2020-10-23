@@ -74,7 +74,9 @@ final blackPawnF = PieceInfo('black_pawn_f', PieceColor.black, PieceType.pawn);
 final blackPawnG = PieceInfo('black_pawn_g', PieceColor.black, PieceType.pawn);
 final blackPawnH = PieceInfo('black_pawn_h', PieceColor.black, PieceType.pawn);
 
-final initBoardState = BoardState([
+final initMove = Move(blackKing, squareE8, squareE8);
+
+final initBoardState = BoardState(initMove, [
   PiecePosition(squareA1, whiteRookA),
   PiecePosition(squareH1, whiteRookH),
   PiecePosition(squareA8, blackRookA),

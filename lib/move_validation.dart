@@ -63,6 +63,14 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
       getOffsetSquare(position.square, fileOffset: -1, rankOffset: -1),
       getOffsetSquare(position.square, fileOffset: -1, rankOffset: 0),
       getOffsetSquare(position.square, fileOffset: -1, rankOffset: 1),
+
+      // TODO: castle
+      // The castling must be kingside or queenside.[5]
+      // Neither the king nor the chosen rook has previously moved.
+      // There are no pieces between the king and the chosen rook.
+      // The king is not currently in check.
+      // The king does not pass through a square that is attacked by an enemy piece.
+      // The king does not end up in check. (True of any legal move.)ing doesnt move, rook_a or rook_h doesnt move, no pieces in between
     ];
 
     return squares;
@@ -131,19 +139,22 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
   return [];
 }
 
-List<Square> getValidMoves(PiecePosition position, BoardState state) {
-  final List<Square> squares = _getPieceMoves(position, state);
+List<Square> getValidMoves(Square fromSquare, BoardState state) {
+  final position = state.getPiecePosition(fromSquare);
+  final allSquares = _getPieceMoves(position, state);
+  final legalSquares = List<Square>.from(allSquares.where((toSquare) {
+    return toSquare != null &&
+        (state.getPiecePosition(toSquare) == null ||
+            state.getPiecePosition(toSquare).pieceInfo.color !=
+                position.pieceInfo.color);
+  }).where((toSquare) => !checkCheck(
+      position.pieceInfo.color, state.addMove(fromSquare, toSquare))));
 
-  return squares
-      .where((square) =>
-          square != null &&
-          (state.getPiecePosition(square) == null ||
-              state.getPiecePosition(square).pieceInfo.color !=
-                  position.pieceInfo.color))
-      .toList();
+  return legalSquares;
 }
 
-getOffsetSquare(Square square, {int fileOffset = 0, int rankOffset = 0}) {
+Square getOffsetSquare(Square square,
+    {int fileOffset = 0, int rankOffset = 0}) {
   final fileIndex = File.values.indexOf(square.file) + fileOffset;
   final rankIndex = Rank.values.indexOf(square.rank) + rankOffset;
 
@@ -157,7 +168,7 @@ getOffsetSquare(Square square, {int fileOffset = 0, int rankOffset = 0}) {
   );
 }
 
-getOffsetSquareSeq(BoardState state, Square square,
+List<Square> getOffsetSquareSeq(BoardState state, Square square,
     {int fileOffset = 0, int rankOffset = 0}) {
   bool isWhile = true;
   final startPosition = state.getPiecePosition(square);
@@ -187,4 +198,102 @@ getOffsetSquareSeq(BoardState state, Square square,
   }
 
   return squares;
+}
+
+bool checkCheck(PieceColor color, BoardState state) {
+  final kingPosition = state.piecePositions.firstWhere((position) =>
+      position.pieceInfo.type == PieceType.king &&
+      position.pieceInfo.color == color);
+
+  final List<Square> knightSquares = [
+    getOffsetSquare(kingPosition.square, fileOffset: 1, rankOffset: 2),
+    getOffsetSquare(kingPosition.square, fileOffset: 2, rankOffset: 1),
+    getOffsetSquare(kingPosition.square, fileOffset: 2, rankOffset: -1),
+    getOffsetSquare(kingPosition.square, fileOffset: 1, rankOffset: -2),
+    getOffsetSquare(kingPosition.square, fileOffset: -1, rankOffset: -2),
+    getOffsetSquare(kingPosition.square, fileOffset: -2, rankOffset: -1),
+    getOffsetSquare(kingPosition.square, fileOffset: -2, rankOffset: 1),
+    getOffsetSquare(kingPosition.square, fileOffset: -1, rankOffset: 2),
+  ];
+
+  final isKnightAttack = knightSquares.any((square) {
+    final position = state.getPiecePosition(square);
+
+    return position != null &&
+        position.pieceInfo.type == PieceType.knight &&
+        position.pieceInfo.color != color;
+  });
+
+  final List<Square> rookSquares = [
+    ...getOffsetSquareSeq(state, kingPosition.square, fileOffset: 1),
+    ...getOffsetSquareSeq(state, kingPosition.square, fileOffset: -1),
+    ...getOffsetSquareSeq(state, kingPosition.square, rankOffset: -1),
+    ...getOffsetSquareSeq(state, kingPosition.square, rankOffset: 1),
+  ];
+
+  final isRookQueenAttack = rookSquares.any((square) {
+    final position = state.getPiecePosition(square);
+
+    return position != null &&
+        [PieceType.rook, PieceType.queen].contains(position.pieceInfo.type) &&
+        position.pieceInfo.color != color;
+  });
+
+  final List<Square> bishopSquares = [
+    ...getOffsetSquareSeq(state, kingPosition.square,
+        fileOffset: 1, rankOffset: 1),
+    ...getOffsetSquareSeq(state, kingPosition.square,
+        fileOffset: -1, rankOffset: -1),
+    ...getOffsetSquareSeq(state, kingPosition.square,
+        fileOffset: 1, rankOffset: -1),
+    ...getOffsetSquareSeq(state, kingPosition.square,
+        fileOffset: -1, rankOffset: 1),
+  ];
+
+  final isBishopQueenAttack = bishopSquares.any((square) {
+    final position = state.getPiecePosition(square);
+
+    return position != null &&
+        [PieceType.bishop, PieceType.queen].contains(position.pieceInfo.type) &&
+        position.pieceInfo.color != color;
+  });
+
+  final List<Square> pawnSquares = [
+    if (kingPosition.pieceInfo.color == PieceColor.white)
+      getOffsetSquare(kingPosition.square, fileOffset: 1, rankOffset: 1),
+    if (kingPosition.pieceInfo.color == PieceColor.white)
+      getOffsetSquare(kingPosition.square, fileOffset: -1, rankOffset: 1),
+    if (kingPosition.pieceInfo.color == PieceColor.black)
+      getOffsetSquare(kingPosition.square, fileOffset: 1, rankOffset: -1),
+    if (kingPosition.pieceInfo.color == PieceColor.black)
+      getOffsetSquare(kingPosition.square, fileOffset: -1, rankOffset: -1),
+  ];
+
+  final isPawnAttack = pawnSquares.any((square) {
+    final position = state.getPiecePosition(square);
+
+    return position != null &&
+        [PieceType.pawn].contains(position.pieceInfo.type) &&
+        position.pieceInfo.color != color;
+  });
+
+  return isPawnAttack ||
+      isKnightAttack ||
+      isRookQueenAttack ||
+      isBishopQueenAttack;
+}
+
+bool checkCheckMate(PieceColor color, BoardState state) {
+  final allPositions = state.piecePositions
+      .where((position) => position.pieceInfo.color == color);
+
+  for (final position in allPositions) {
+    final validMoves = getValidMoves(position.square, state);
+
+    if (validMoves.isNotEmpty) {
+      return false;
+    }
+  }
+
+  return true;
 }

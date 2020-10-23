@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'board_controls.dart';
 import 'engine.dart';
 import 'init_board_state.dart';
 import 'move_validation.dart';
@@ -16,25 +17,31 @@ class Board extends StatefulWidget {
 
 class _BoardState extends State<Board> {
   BoardHistory boardHistory;
-  PieceColor movingColor = PieceColor.white;
   Square fromSquare;
   List<Square> validMoves = [];
 
   @override
   void initState() {
     super.initState();
-    boardHistory = BoardHistory(initBoardState);
+    boardHistory = BoardHistory([initBoardState]);
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
-    return Container(
-      width: screenWidth,
-      height: screenWidth,
-      child: Row(
-        children: getFiles,
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Container(
+            width: screenWidth,
+            height: screenWidth,
+            child: Row(
+              children: getFiles,
+            ),
+          ),
+          BoardControls(restartGame: restartGame),
+        ],
       ),
     );
   }
@@ -55,9 +62,15 @@ class _BoardState extends State<Board> {
       final squareColor =
           fileIndex % 2 == rankIndex % 2 ? Colors.brown : Colors.brown[100];
       final PiecePosition piecePosition =
-          boardHistory.getState().getPiecePosition(square);
+          boardHistory.currentState.getPiecePosition(square);
 
       final isValidMoveSquare = validMoves.contains(square);
+      final isCheck = piecePosition != null &&
+          piecePosition.pieceInfo.type == PieceType.king &&
+          checkCheck(piecePosition.pieceInfo.color, boardHistory.currentState);
+      final isCheckMate = isCheck &&
+          checkCheckMate(
+              piecePosition.pieceInfo.color, boardHistory.currentState);
 
       return Flexible(
         child: GestureDetector(
@@ -73,11 +86,15 @@ class _BoardState extends State<Board> {
                   ? piecePosition != null
                       ? Colors.redAccent
                       : Colors.purpleAccent[100]
-                  : squareColor,
+                  : isCheckMate
+                      ? Colors.redAccent
+                      : squareColor,
               border: Border.all(
                   color: square == fromSquare
-                      ? Colors.pinkAccent
-                      : Colors.transparent,
+                      ? Colors.greenAccent
+                      : isCheck
+                          ? Colors.redAccent
+                          : Colors.transparent,
                   width: 2),
             ),
           ),
@@ -89,9 +106,10 @@ class _BoardState extends State<Board> {
   Function onSquareTap(Square square, PiecePosition piecePosition) {
     return () {
       if (piecePosition != null &&
-          piecePosition.pieceInfo.color == movingColor) {
+          piecePosition.pieceInfo.color ==
+              boardHistory.currentState.movingColor) {
         if (fromSquare != square) {
-          initMove(square, piecePosition);
+          initMove(square);
         } else {
           cancelMove();
         }
@@ -101,10 +119,10 @@ class _BoardState extends State<Board> {
     };
   }
 
-  void initMove(Square square, PiecePosition piecePosition) {
+  void initMove(Square square) {
     setState(() {
       fromSquare = square;
-      validMoves = getValidMoves(piecePosition, boardHistory.getState());
+      validMoves = getValidMoves(square, boardHistory.currentState);
     });
   }
 
@@ -115,21 +133,22 @@ class _BoardState extends State<Board> {
     });
   }
 
-  void completeMove(Square square) {
-    final fromPosition = boardHistory.getState().getPiecePosition(fromSquare);
-    final toPosition = boardHistory.getState().getPiecePosition(square);
+  void completeMove(Square toSquare) {
+    final newState = boardHistory.currentState.addMove(fromSquare, toSquare);
 
-    List<PiecePosition> piecePositions = boardHistory.getState().piecePositions
-      ..removeWhere((position) => position == fromPosition)
-      ..removeWhere((position) => position == toPosition)
-      ..add(PiecePosition(square, fromPosition.pieceInfo));
-    boardHistory.addState(BoardState(piecePositions));
+    setState(() {
+      boardHistory = boardHistory.addState(newState);
+      fromSquare = null;
+      validMoves = [];
+    });
+  }
 
+  void restartGame() {
+    print('Restarting game...');
     setState(() {
       fromSquare = null;
       validMoves = [];
-      movingColor =
-          movingColor == PieceColor.white ? PieceColor.black : PieceColor.white;
+      boardHistory = boardHistory.restartGame();
     });
   }
 }

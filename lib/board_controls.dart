@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
 class BoardControls extends StatelessWidget {
+  final Function restartGame;
+
   const BoardControls({
     Key key,
+    this.restartGame,
   }) : super(key: key);
 
   @override
@@ -14,7 +17,10 @@ class BoardControls extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(Icons.menu, color: Colors.white),
+          InkWell(
+            onTap: restartGame,
+            child: Icon(Icons.menu, color: Colors.white),
+          ),
           Icon(Icons.swap_calls, color: Colors.white),
           Icon(Icons.arrow_back, color: Colors.white),
           Icon(Icons.arrow_forward, color: Colors.white),

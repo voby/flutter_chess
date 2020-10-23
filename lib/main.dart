@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'board.dart';
-import 'board_controls.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,14 +20,7 @@ class MyApp extends StatelessWidget {
           title: Text('Game #5'),
         ),
         backgroundColor: Colors.blueGrey,
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Board(),
-              BoardControls(),
-            ],
-          ),
-        ),
+        body: Board(),
       ),
     );
   }
