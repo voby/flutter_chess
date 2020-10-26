@@ -21,7 +21,9 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
         if (topRightPosition != null &&
             topRightPosition.pieceInfo.color != position.pieceInfo.color)
           topRightSquare,
-        if (position.square.rank == Rank.second && topTopPosition == null)
+        if (position.square.rank == Rank.second &&
+            topTopPosition == null &&
+            topPosition == null)
           topTopSquare,
       ];
 
@@ -46,7 +48,9 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
       if (topRightPosition != null &&
           topRightPosition.pieceInfo.color != position.pieceInfo.color)
         topRightSquare,
-      if (position.square.rank == Rank.seventh && topTopPosition == null)
+      if (position.square.rank == Rank.seventh &&
+          topTopPosition == null &&
+          topPosition == null)
         topTopSquare,
     ];
 
@@ -54,6 +58,86 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
   }
 
   if (position.pieceInfo.type == PieceType.king) {
+    final whiteKingPosition =
+        state.getPiecePosition(Square(File.e, Rank.first));
+    final blackKingPosition =
+        state.getPiecePosition(Square(File.e, Rank.eighth));
+    final whiteKingsideRookPosition =
+        state.getPiecePosition(Square(File.h, Rank.first));
+    final whiteQueensideRookPosition =
+        state.getPiecePosition(Square(File.a, Rank.first));
+    final blackKingsideRookPosition =
+        state.getPiecePosition(Square(File.h, Rank.eighth));
+    final blackQueensideRookPosition =
+        state.getPiecePosition(Square(File.a, Rank.eighth));
+    final whiteKingNoCheck = !isKingUnderAttack(PieceColor.white, state);
+    final blackKingNoCheck = !isKingUnderAttack(PieceColor.black, state);
+    final whiteKingNoMove = whiteKingPosition != null && whiteKingPosition.init;
+    final blackKingNoMove = blackKingPosition != null && blackKingPosition.init;
+    final whiteKingsideRookNoMove =
+        whiteKingsideRookPosition != null && whiteKingsideRookPosition.init;
+    final whiteQueensideRookNoMove =
+        whiteQueensideRookPosition != null && whiteQueensideRookPosition.init;
+    final blackKingsideRookNoMove =
+        blackKingsideRookPosition != null && blackKingsideRookPosition.init;
+    final blackQueensideRookNoMove =
+        blackQueensideRookPosition != null && blackQueensideRookPosition.init;
+    final whiteKingsideNoPieces = [
+      Square(File.f, Rank.first),
+      Square(File.g, Rank.first)
+    ].every((square) => state.getPiecePosition(square) == null);
+    final whiteQueensideNoPieces = [
+      Square(File.b, Rank.first),
+      Square(File.c, Rank.first),
+      Square(File.d, Rank.first),
+    ].every((square) => state.getPiecePosition(square) == null);
+    final blackKingsideNoPieces = [
+      Square(File.f, Rank.eighth),
+      Square(File.g, Rank.eighth)
+    ].every((square) => state.getPiecePosition(square) == null);
+    final blackQueensideNoPieces = [
+      Square(File.b, Rank.eighth),
+      Square(File.c, Rank.eighth),
+      Square(File.d, Rank.eighth),
+    ].every((square) => state.getPiecePosition(square) == null);
+    final whiteKingsideNoCheckSquares = [
+      Square(File.f, Rank.first),
+      Square(File.g, Rank.first)
+    ].every((square) => !isSquareUnderAttack(PieceColor.white, square, state));
+    final whiteQueensideNoCheckSquares = [
+      Square(File.c, Rank.first),
+      Square(File.d, Rank.first),
+    ].every((square) => !isSquareUnderAttack(PieceColor.white, square, state));
+    final blackKingsideNoCheckSquares = [
+      Square(File.f, Rank.eighth),
+      Square(File.g, Rank.eighth)
+    ].every((square) => !isSquareUnderAttack(PieceColor.black, square, state));
+    final blackQueensideNoCheckSquares = [
+      Square(File.c, Rank.eighth),
+      Square(File.d, Rank.eighth),
+    ].every((square) => !isSquareUnderAttack(PieceColor.black, square, state));
+
+    final whiteKingsideCastle = whiteKingNoCheck &&
+        whiteKingNoMove &&
+        whiteKingsideRookNoMove &&
+        whiteKingsideNoPieces &&
+        whiteKingsideNoCheckSquares;
+    final whiteQueensideCastle = whiteKingNoCheck &&
+        whiteKingNoMove &&
+        whiteQueensideRookNoMove &&
+        whiteQueensideNoPieces &&
+        whiteQueensideNoCheckSquares;
+    final blackKingsideCastle = blackKingNoCheck &&
+        blackKingNoMove &&
+        blackKingsideRookNoMove &&
+        blackKingsideNoPieces &&
+        blackKingsideNoCheckSquares;
+    final blackQueensideCastle = blackKingNoCheck &&
+        blackKingNoMove &&
+        blackQueensideRookNoMove &&
+        blackQueensideNoPieces &&
+        blackQueensideNoCheckSquares;
+
     final List<Square> squares = [
       getOffsetSquare(position.square, fileOffset: 0, rankOffset: 1),
       getOffsetSquare(position.square, fileOffset: 1, rankOffset: 1),
@@ -63,14 +147,10 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
       getOffsetSquare(position.square, fileOffset: -1, rankOffset: -1),
       getOffsetSquare(position.square, fileOffset: -1, rankOffset: 0),
       getOffsetSquare(position.square, fileOffset: -1, rankOffset: 1),
-
-      // TODO: castle
-      // The castling must be kingside or queenside.[5]
-      // Neither the king nor the chosen rook has previously moved.
-      // There are no pieces between the king and the chosen rook.
-      // The king is not currently in check.
-      // The king does not pass through a square that is attacked by an enemy piece.
-      // The king does not end up in check. (True of any legal move.)ing doesnt move, rook_a or rook_h doesnt move, no pieces in between
+      if (whiteKingsideCastle) Square(File.g, Rank.first),
+      if (whiteQueensideCastle) Square(File.c, Rank.first),
+      if (blackKingsideCastle) Square(File.g, Rank.eighth),
+      if (blackQueensideCastle) Square(File.c, Rank.eighth),
     ];
 
     return squares;
@@ -147,7 +227,7 @@ List<Square> getValidMoves(Square fromSquare, BoardState state) {
         (state.getPiecePosition(toSquare) == null ||
             state.getPiecePosition(toSquare).pieceInfo.color !=
                 position.pieceInfo.color);
-  }).where((toSquare) => !checkCheck(
+  }).where((toSquare) => !isKingUnderAttack(
       position.pieceInfo.color, state.addMove(fromSquare, toSquare))));
 
   return legalSquares;
@@ -188,7 +268,8 @@ List<Square> getOffsetSquareSeq(BoardState state, Square square,
 
       if (endPosition == null) {
         squares.add(s);
-      } else if (endPosition.pieceInfo.color != startPosition.pieceInfo.color) {
+      } else if (startPosition != null &&
+          endPosition.pieceInfo.color != startPosition.pieceInfo.color) {
         squares.add(s);
         isWhile = false;
       } else {
@@ -200,20 +281,16 @@ List<Square> getOffsetSquareSeq(BoardState state, Square square,
   return squares;
 }
 
-bool checkCheck(PieceColor color, BoardState state) {
-  final kingPosition = state.piecePositions.firstWhere((position) =>
-      position.pieceInfo.type == PieceType.king &&
-      position.pieceInfo.color == color);
-
+bool isSquareUnderAttack(PieceColor color, Square square, BoardState state) {
   final List<Square> knightSquares = [
-    getOffsetSquare(kingPosition.square, fileOffset: 1, rankOffset: 2),
-    getOffsetSquare(kingPosition.square, fileOffset: 2, rankOffset: 1),
-    getOffsetSquare(kingPosition.square, fileOffset: 2, rankOffset: -1),
-    getOffsetSquare(kingPosition.square, fileOffset: 1, rankOffset: -2),
-    getOffsetSquare(kingPosition.square, fileOffset: -1, rankOffset: -2),
-    getOffsetSquare(kingPosition.square, fileOffset: -2, rankOffset: -1),
-    getOffsetSquare(kingPosition.square, fileOffset: -2, rankOffset: 1),
-    getOffsetSquare(kingPosition.square, fileOffset: -1, rankOffset: 2),
+    getOffsetSquare(square, fileOffset: 1, rankOffset: 2),
+    getOffsetSquare(square, fileOffset: 2, rankOffset: 1),
+    getOffsetSquare(square, fileOffset: 2, rankOffset: -1),
+    getOffsetSquare(square, fileOffset: 1, rankOffset: -2),
+    getOffsetSquare(square, fileOffset: -1, rankOffset: -2),
+    getOffsetSquare(square, fileOffset: -2, rankOffset: -1),
+    getOffsetSquare(square, fileOffset: -2, rankOffset: 1),
+    getOffsetSquare(square, fileOffset: -1, rankOffset: 2),
   ];
 
   final isKnightAttack = knightSquares.any((square) {
@@ -225,10 +302,10 @@ bool checkCheck(PieceColor color, BoardState state) {
   });
 
   final List<Square> rookSquares = [
-    ...getOffsetSquareSeq(state, kingPosition.square, fileOffset: 1),
-    ...getOffsetSquareSeq(state, kingPosition.square, fileOffset: -1),
-    ...getOffsetSquareSeq(state, kingPosition.square, rankOffset: -1),
-    ...getOffsetSquareSeq(state, kingPosition.square, rankOffset: 1),
+    ...getOffsetSquareSeq(state, square, fileOffset: 1),
+    ...getOffsetSquareSeq(state, square, fileOffset: -1),
+    ...getOffsetSquareSeq(state, square, rankOffset: -1),
+    ...getOffsetSquareSeq(state, square, rankOffset: 1),
   ];
 
   final isRookQueenAttack = rookSquares.any((square) {
@@ -240,14 +317,10 @@ bool checkCheck(PieceColor color, BoardState state) {
   });
 
   final List<Square> bishopSquares = [
-    ...getOffsetSquareSeq(state, kingPosition.square,
-        fileOffset: 1, rankOffset: 1),
-    ...getOffsetSquareSeq(state, kingPosition.square,
-        fileOffset: -1, rankOffset: -1),
-    ...getOffsetSquareSeq(state, kingPosition.square,
-        fileOffset: 1, rankOffset: -1),
-    ...getOffsetSquareSeq(state, kingPosition.square,
-        fileOffset: -1, rankOffset: 1),
+    ...getOffsetSquareSeq(state, square, fileOffset: 1, rankOffset: 1),
+    ...getOffsetSquareSeq(state, square, fileOffset: -1, rankOffset: -1),
+    ...getOffsetSquareSeq(state, square, fileOffset: 1, rankOffset: -1),
+    ...getOffsetSquareSeq(state, square, fileOffset: -1, rankOffset: 1),
   ];
 
   final isBishopQueenAttack = bishopSquares.any((square) {
@@ -259,14 +332,14 @@ bool checkCheck(PieceColor color, BoardState state) {
   });
 
   final List<Square> pawnSquares = [
-    if (kingPosition.pieceInfo.color == PieceColor.white)
-      getOffsetSquare(kingPosition.square, fileOffset: 1, rankOffset: 1),
-    if (kingPosition.pieceInfo.color == PieceColor.white)
-      getOffsetSquare(kingPosition.square, fileOffset: -1, rankOffset: 1),
-    if (kingPosition.pieceInfo.color == PieceColor.black)
-      getOffsetSquare(kingPosition.square, fileOffset: 1, rankOffset: -1),
-    if (kingPosition.pieceInfo.color == PieceColor.black)
-      getOffsetSquare(kingPosition.square, fileOffset: -1, rankOffset: -1),
+    if (color == PieceColor.white)
+      getOffsetSquare(square, fileOffset: 1, rankOffset: 1),
+    if (color == PieceColor.white)
+      getOffsetSquare(square, fileOffset: -1, rankOffset: 1),
+    if (color == PieceColor.black)
+      getOffsetSquare(square, fileOffset: 1, rankOffset: -1),
+    if (color == PieceColor.black)
+      getOffsetSquare(square, fileOffset: -1, rankOffset: -1),
   ];
 
   final isPawnAttack = pawnSquares.any((square) {
@@ -283,7 +356,15 @@ bool checkCheck(PieceColor color, BoardState state) {
       isBishopQueenAttack;
 }
 
-bool checkCheckMate(PieceColor color, BoardState state) {
+bool isKingUnderAttack(PieceColor color, BoardState state) {
+  final kingPosition = state.piecePositions.firstWhere((position) =>
+      position.pieceInfo.type == PieceType.king &&
+      position.pieceInfo.color == color);
+
+  return isSquareUnderAttack(color, kingPosition.square, state);
+}
+
+bool isColorHasLegalMoves(PieceColor color, BoardState state) {
   final allPositions = state.piecePositions
       .where((position) => position.pieceInfo.color == color);
 

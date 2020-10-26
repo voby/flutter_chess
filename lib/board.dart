@@ -18,7 +18,7 @@ class Board extends StatefulWidget {
 class _BoardState extends State<Board> {
   BoardHistory boardHistory;
   Square fromSquare;
-  List<Square> validMoves = [];
+  List<Square> legalMoves = [];
 
   @override
   void initState() {
@@ -64,13 +64,17 @@ class _BoardState extends State<Board> {
       final PiecePosition piecePosition =
           boardHistory.currentState.getPiecePosition(square);
 
-      final isValidMoveSquare = validMoves.contains(square);
-      final isCheck = piecePosition != null &&
+      final isLegalMoveSquare = legalMoves.contains(square);
+
+      final isKing = piecePosition != null &&
           piecePosition.pieceInfo.type == PieceType.king &&
-          checkCheck(piecePosition.pieceInfo.color, boardHistory.currentState);
-      final isCheckMate = isCheck &&
-          checkCheckMate(
-              piecePosition.pieceInfo.color, boardHistory.currentState);
+          piecePosition.pieceInfo.color ==
+              boardHistory.currentState.movingColor;
+      final isCheck = isKing &&
+          isSquareUnderAttack(
+              piecePosition.pieceInfo.color, square, boardHistory.currentState);
+      final isStalemate = isKing && boardHistory.currentState.isStalemate();
+      final isCheckmate = isKing && boardHistory.currentState.isCheckmate();
 
       return Flexible(
         child: GestureDetector(
@@ -82,13 +86,15 @@ class _BoardState extends State<Board> {
                   )
                 : SizedBox.expand(),
             decoration: BoxDecoration(
-              color: isValidMoveSquare
+              color: isLegalMoveSquare
                   ? piecePosition != null
                       ? Colors.redAccent
                       : Colors.purpleAccent[100]
-                  : isCheckMate
+                  : isCheckmate
                       ? Colors.redAccent
-                      : squareColor,
+                      : isStalemate
+                          ? Colors.yellowAccent
+                          : squareColor,
               border: Border.all(
                   color: square == fromSquare
                       ? Colors.greenAccent
@@ -113,7 +119,7 @@ class _BoardState extends State<Board> {
         } else {
           cancelMove();
         }
-      } else if (validMoves.contains(square)) {
+      } else if (legalMoves.contains(square)) {
         completeMove(square);
       }
     };
@@ -122,14 +128,14 @@ class _BoardState extends State<Board> {
   void initMove(Square square) {
     setState(() {
       fromSquare = square;
-      validMoves = getValidMoves(square, boardHistory.currentState);
+      legalMoves = getValidMoves(square, boardHistory.currentState);
     });
   }
 
   void cancelMove() {
     setState(() {
       fromSquare = null;
-      validMoves = [];
+      legalMoves = [];
     });
   }
 
@@ -139,7 +145,7 @@ class _BoardState extends State<Board> {
     setState(() {
       boardHistory = boardHistory.addState(newState);
       fromSquare = null;
-      validMoves = [];
+      legalMoves = [];
     });
   }
 
@@ -147,7 +153,7 @@ class _BoardState extends State<Board> {
     print('Restarting game...');
     setState(() {
       fromSquare = null;
-      validMoves = [];
+      legalMoves = [];
       boardHistory = boardHistory.restartGame();
     });
   }

@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_chess/init_board_state.dart';
+
+import 'init_board_state.dart';
+import 'move_validation.dart';
 
 enum PieceColor { black, white }
 enum PieceType { king, queen, rook, bishop, knight, pawn }
@@ -39,8 +41,9 @@ class PieceInfo {
 class PiecePosition extends Equatable {
   final Square square;
   final PieceInfo pieceInfo;
+  final bool init;
 
-  PiecePosition(this.square, this.pieceInfo);
+  PiecePosition(this.square, this.pieceInfo, {this.init = false});
 
   @override
   List<Object> get props => [square];
@@ -75,7 +78,39 @@ class BoardState {
       ..removeWhere((position) => position == toPosition)
       ..add(PiecePosition(toSquare, fromPosition.pieceInfo));
 
+    // castle
+    final rank = fromPosition.pieceInfo.color == PieceColor.white
+        ? Rank.first
+        : Rank.eighth;
+    if (fromPosition.pieceInfo.type == PieceType.king &&
+        fromPosition.square == Square(File.e, rank)) {
+      if (toSquare == Square(File.g, rank)) {
+        final rookPosition = piecePositions
+            .where((position) => position.square == Square(File.h, rank))
+            .first;
+        piecePositions
+          ..removeWhere((position) => position == rookPosition)
+          ..add(PiecePosition(Square(File.f, rank), rookPosition.pieceInfo));
+      } else if (toSquare == Square(File.c, rank)) {
+        final rookPosition = piecePositions
+            .where((position) => position.square == Square(File.a, rank))
+            .first;
+        piecePositions
+          ..removeWhere((position) => position == rookPosition)
+          ..add(PiecePosition(Square(File.d, rank), rookPosition.pieceInfo));
+      }
+    }
+
     return BoardState(move, piecePositions);
+  }
+
+  bool isStalemate() {
+    return isColorHasLegalMoves(movingColor, this);
+  }
+
+  bool isCheckmate() {
+    return isKingUnderAttack(movingColor, this) &&
+        isColorHasLegalMoves(movingColor, this);
   }
 }
 
