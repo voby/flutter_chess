@@ -1,4 +1,9 @@
-import 'engine.dart';
+import 'board_state.dart';
+import 'enums.dart';
+import 'move.dart';
+import 'piece_info.dart';
+import 'piece_position.dart';
+import 'square.dart';
 
 final squareA1 = Square(File.a, Rank.first);
 final squareA2 = Square(File.a, Rank.second);

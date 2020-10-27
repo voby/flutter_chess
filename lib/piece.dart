@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-import 'engine.dart';
+import 'engine/piece_info.dart';
 
 class Piece extends StatelessWidget {
   const Piece({

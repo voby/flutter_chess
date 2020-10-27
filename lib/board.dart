@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'board_controls.dart';
-import 'engine.dart';
-import 'init_board_state.dart';
-import 'move_validation.dart';
+import 'engine/board_history.dart';
+import 'engine/board_init_state.dart';
+import 'engine/enums.dart';
+import 'engine/move_validation.dart';
+import 'engine/piece_position.dart';
+import 'engine/square.dart';
 import 'piece.dart';
 
 class Board extends StatefulWidget {
@@ -20,10 +23,14 @@ class _BoardState extends State<Board> {
   Square fromSquare;
   List<Square> legalMoves = [];
 
-  @override
-  void initState() {
-    super.initState();
-    boardHistory = BoardHistory([initBoardState]);
+  List<Widget> get getFiles {
+    return List.generate(8, (i) => i).map((fileIndex) {
+      return Flexible(
+        child: Column(
+          children: getSquares(fileIndex),
+        ),
+      );
+    }).toList();
   }
 
   @override
@@ -40,20 +47,46 @@ class _BoardState extends State<Board> {
               children: getFiles,
             ),
           ),
-          BoardControls(restartGame: restartGame),
+          BoardControls(
+            hasRestartGame: boardHistory.hasResetState,
+            restartGame: restartGame,
+            hasNextState: boardHistory.hasNextState,
+            setNextState: setNextState,
+            hasPrevState: boardHistory.hasPrevState,
+            setPrevState: setPrevState,
+          ),
         ],
       ),
     );
   }
 
-  List<Widget> get getFiles {
-    return List.generate(8, (i) => i).map((fileIndex) {
-      return Flexible(
-        child: Column(
-          children: getSquares(fileIndex),
-        ),
-      );
-    }).toList();
+  void setPrevState() {
+    setState(() {
+      boardHistory = boardHistory.setPrevState();
+    });
+  }
+
+  void setNextState() {
+    setState(() {
+      boardHistory = boardHistory.setNextState();
+    });
+  }
+
+  void cancelMove() {
+    setState(() {
+      fromSquare = null;
+      legalMoves = [];
+    });
+  }
+
+  void completeMove(Square toSquare) {
+    final newState = boardHistory.currentState.addMove(fromSquare, toSquare);
+
+    setState(() {
+      boardHistory = boardHistory.addState(newState);
+      fromSquare = null;
+      legalMoves = [];
+    });
   }
 
   List<Widget> getSquares(int fileIndex) {
@@ -109,6 +142,19 @@ class _BoardState extends State<Board> {
     }).toList();
   }
 
+  void initMove(Square square) {
+    setState(() {
+      fromSquare = square;
+      legalMoves = getValidMoves(square, boardHistory.currentState);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    boardHistory = BoardHistory([initBoardState]);
+  }
+
   Function onSquareTap(Square square, PiecePosition piecePosition) {
     return () {
       if (piecePosition != null &&
@@ -125,36 +171,12 @@ class _BoardState extends State<Board> {
     };
   }
 
-  void initMove(Square square) {
-    setState(() {
-      fromSquare = square;
-      legalMoves = getValidMoves(square, boardHistory.currentState);
-    });
-  }
-
-  void cancelMove() {
-    setState(() {
-      fromSquare = null;
-      legalMoves = [];
-    });
-  }
-
-  void completeMove(Square toSquare) {
-    final newState = boardHistory.currentState.addMove(fromSquare, toSquare);
-
-    setState(() {
-      boardHistory = boardHistory.addState(newState);
-      fromSquare = null;
-      legalMoves = [];
-    });
-  }
-
   void restartGame() {
     print('Restarting game...');
     setState(() {
       fromSquare = null;
       legalMoves = [];
-      boardHistory = boardHistory.restartGame();
+      boardHistory = boardHistory.resetState();
     });
   }
 }

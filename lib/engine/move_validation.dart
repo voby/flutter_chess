@@ -1,4 +1,7 @@
-import 'engine.dart';
+import 'enums.dart';
+import 'piece_position.dart';
+import 'board_state.dart';
+import 'square.dart';
 
 List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
   if (position.pieceInfo.type == PieceType.pawn) {

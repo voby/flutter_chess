@@ -10,14 +10,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Chess',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Game #5'),
+          title: Text('Chess'),
         ),
         backgroundColor: Colors.blueGrey,
         body: Board(),

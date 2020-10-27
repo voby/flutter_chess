@@ -1,59 +1,19 @@
 import 'package:equatable/equatable.dart';
 
-import 'init_board_state.dart';
+import 'enums.dart';
+import 'move.dart';
 import 'move_validation.dart';
+import 'piece_position.dart';
+import 'square.dart';
 
-enum PieceColor { black, white }
-enum PieceType { king, queen, rook, bishop, knight, pawn }
-enum File { a, b, c, d, e, f, g, h }
-enum Rank { first, second, third, fourth, fifth, sixth, seventh, eighth }
-
-class Move {
-  final PieceInfo piece;
-  final Square from;
-  final Square to;
-
-  Move(this.piece, this.from, this.to);
-}
-
-class Square extends Equatable {
-  final File file;
-  final Rank rank;
-
-  Square(this.file, this.rank);
-
-  factory Square.fromIndexes(int fileIndex, int rankIndex) {
-    return Square(File.values[fileIndex], Rank.values[rankIndex]);
-  }
-
-  @override
-  List<Object> get props => [file, rank];
-}
-
-class PieceInfo {
-  final String id;
-  final PieceColor color;
-  final PieceType type;
-
-  PieceInfo(this.id, this.color, this.type);
-}
-
-class PiecePosition extends Equatable {
-  final Square square;
-  final PieceInfo pieceInfo;
-  final bool init;
-
-  PiecePosition(this.square, this.pieceInfo, {this.init = false});
-
-  @override
-  List<Object> get props => [square];
-}
-
-class BoardState {
+class BoardState extends Equatable {
   final Move _move;
   final List<PiecePosition> _piecePositions;
 
   BoardState(this._move, this._piecePositions);
+
+  @override
+  List<Object> get props => [_move, _piecePositions];
 
   Move get move => _move;
   PieceColor get movingColor => _move.piece.color == PieceColor.white
@@ -104,6 +64,10 @@ class BoardState {
     return BoardState(move, piecePositions);
   }
 
+  List<Square> getLegalMoves(Square fromSquare) {
+    return getValidMoves(fromSquare, this);
+  }
+
   bool isStalemate() {
     return isColorHasLegalMoves(movingColor, this);
   }
@@ -111,21 +75,5 @@ class BoardState {
   bool isCheckmate() {
     return isKingUnderAttack(movingColor, this) &&
         isColorHasLegalMoves(movingColor, this);
-  }
-}
-
-class BoardHistory {
-  final List<BoardState> _boardStates;
-
-  BoardHistory(this._boardStates);
-
-  BoardState get currentState => _boardStates.last;
-
-  BoardHistory addState(BoardState state) {
-    return BoardHistory([..._boardStates, state]);
-  }
-
-  BoardHistory restartGame() {
-    return BoardHistory([initBoardState]);
   }
 }
