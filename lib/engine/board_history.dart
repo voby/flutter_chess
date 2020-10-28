@@ -10,9 +10,6 @@ class BoardHistory {
   BoardState get currentState => _boardStates[_stateIndex];
 
   bool get hasPrevState => _stateIndex > 0;
-
-  bool get hasNextState => _stateIndex < (_boardStates.length - 1);
-
   BoardHistory setPrevState() {
     if (hasPrevState) {
       return BoardHistory(_boardStates, stateIndex: _stateIndex - 1);
@@ -21,6 +18,7 @@ class BoardHistory {
     return this;
   }
 
+  bool get hasNextState => _stateIndex < (_boardStates.length - 1);
   BoardHistory setNextState() {
     if (hasNextState) {
       return BoardHistory(_boardStates, stateIndex: _stateIndex + 1);
@@ -40,7 +38,6 @@ class BoardHistory {
   }
 
   bool get hasResetState => _boardStates.length > 1;
-
   BoardHistory resetState() {
     if (hasResetState) {
       return BoardHistory([this._boardStates[0]]);

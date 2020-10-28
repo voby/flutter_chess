@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class BoardControls extends StatelessWidget {
+  final Function rotateBoard;
   final bool hasRestartGame;
   final Function restartGame;
   final bool hasNextState;
@@ -8,15 +9,16 @@ class BoardControls extends StatelessWidget {
   final Function setNextState;
   final Function setPrevState;
 
-  const BoardControls(
-      {Key key,
-      this.hasRestartGame,
-      this.restartGame,
-      this.hasNextState,
-      this.hasPrevState,
-      this.setNextState,
-      this.setPrevState})
-      : super(key: key);
+  const BoardControls({
+    Key key,
+    this.rotateBoard,
+    this.hasRestartGame,
+    this.restartGame,
+    this.hasNextState,
+    this.hasPrevState,
+    this.setNextState,
+    this.setPrevState,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +36,10 @@ class BoardControls extends StatelessWidget {
               color: hasRestartGame ? Colors.white : Colors.white38,
             ),
           ),
-          Icon(Icons.swap_calls, color: Colors.white38),
+          InkWell(
+            onTap: rotateBoard,
+            child: Icon(Icons.swap_calls, color: Colors.white),
+          ),
           InkWell(
             onTap: setPrevState,
             child: Icon(

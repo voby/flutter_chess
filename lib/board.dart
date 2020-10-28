@@ -22,16 +22,7 @@ class _BoardState extends State<Board> {
   BoardHistory boardHistory;
   Square fromSquare;
   List<Square> legalMoves = [];
-
-  List<Widget> get getFiles {
-    return List.generate(8, (i) => i).map((fileIndex) {
-      return Flexible(
-        child: Column(
-          children: getSquares(fileIndex),
-        ),
-      );
-    }).toList();
-  }
+  PieceColor focusSide = PieceColor.white;
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +35,11 @@ class _BoardState extends State<Board> {
             width: screenWidth,
             height: screenWidth,
             child: Row(
-              children: getFiles,
+              children: buildFiles,
             ),
           ),
           BoardControls(
+            rotateBoard: rotateBoard,
             hasRestartGame: boardHistory.hasResetState,
             restartGame: restartGame,
             hasNextState: boardHistory.hasNextState,
@@ -60,37 +52,26 @@ class _BoardState extends State<Board> {
     );
   }
 
-  void setPrevState() {
-    setState(() {
-      boardHistory = boardHistory.setPrevState();
-    });
+  List<Widget> get buildFiles {
+    final seed = focusSide == PieceColor.white
+        ? List.generate(8, (i) => i)
+        : List.generate(8, (i) => i).reversed;
+
+    return seed.map((fileIndex) {
+      return Flexible(
+        child: Column(
+          children: buildSquares(fileIndex),
+        ),
+      );
+    }).toList();
   }
 
-  void setNextState() {
-    setState(() {
-      boardHistory = boardHistory.setNextState();
-    });
-  }
+  List<Widget> buildSquares(int fileIndex) {
+    final seed = focusSide == PieceColor.white
+        ? List.generate(8, (i) => i).reversed
+        : List.generate(8, (i) => i);
 
-  void cancelMove() {
-    setState(() {
-      fromSquare = null;
-      legalMoves = [];
-    });
-  }
-
-  void completeMove(Square toSquare) {
-    final newState = boardHistory.currentState.addMove(fromSquare, toSquare);
-
-    setState(() {
-      boardHistory = boardHistory.addState(newState);
-      fromSquare = null;
-      legalMoves = [];
-    });
-  }
-
-  List<Widget> getSquares(int fileIndex) {
-    return List.generate(8, (i) => i).reversed.map((rankIndex) {
+    return seed.map((rankIndex) {
       final square = Square.fromIndexes(fileIndex, rankIndex);
       final squareColor =
           fileIndex % 2 == rankIndex % 2 ? Colors.brown : Colors.brown[100];
@@ -142,6 +123,23 @@ class _BoardState extends State<Board> {
     }).toList();
   }
 
+  void cancelMove() {
+    setState(() {
+      fromSquare = null;
+      legalMoves = [];
+    });
+  }
+
+  void completeMove(Square toSquare) {
+    final newState = boardHistory.currentState.addMove(fromSquare, toSquare);
+
+    setState(() {
+      boardHistory = boardHistory.addState(newState);
+      fromSquare = null;
+      legalMoves = [];
+    });
+  }
+
   void initMove(Square square) {
     setState(() {
       fromSquare = square;
@@ -172,11 +170,35 @@ class _BoardState extends State<Board> {
   }
 
   void restartGame() {
-    print('Restarting game...');
+    if (boardHistory.hasResetState) {
+      setState(() {
+        fromSquare = null;
+        legalMoves = [];
+        boardHistory = boardHistory.resetState();
+      });
+    }
+  }
+
+  void rotateBoard() {
     setState(() {
-      fromSquare = null;
-      legalMoves = [];
-      boardHistory = boardHistory.resetState();
+      focusSide =
+          focusSide == PieceColor.white ? PieceColor.black : PieceColor.white;
     });
+  }
+
+  void setPrevState() {
+    if (boardHistory.hasPrevState) {
+      setState(() {
+        boardHistory = boardHistory.setPrevState();
+      });
+    }
+  }
+
+  void setNextState() {
+    if (boardHistory.hasNextState) {
+      setState(() {
+        boardHistory = boardHistory.setNextState();
+      });
+    }
   }
 }
