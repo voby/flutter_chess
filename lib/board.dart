@@ -90,32 +90,45 @@ class _BoardState extends State<Board> {
       final isStalemate = isKing && boardHistory.currentState.isStalemate();
       final isCheckmate = isKing && boardHistory.currentState.isCheckmate();
 
+      final child = piecePosition != null
+          ? Piece(
+              pieceInfo: piecePosition.pieceInfo,
+              containerColor: isCheckmate
+                  ? Colors.redAccent.withOpacity(0.8)
+                  : isStalemate
+                      ? Colors.yellowAccent.withOpacity(0.8)
+                      : fromSquare == square
+                          ? Colors.greenAccent.withOpacity(0.3)
+                          : isLegalMoveSquare
+                              ? Colors.redAccent.withOpacity(0.3)
+                              : null,
+            )
+          : isLegalMoveSquare
+              ? SizedBox.expand(
+                  child: Container(color: Colors.greenAccent.withOpacity(0.3)))
+              : SizedBox.expand();
+      final color = squareColor;
+      final border = Border.all(
+        color: piecePosition != null && isLegalMoveSquare
+            ? Colors.redAccent.withOpacity(0.7)
+            : square == fromSquare || isLegalMoveSquare
+                ? Colors.greenAccent.withOpacity(0.7)
+                : isCheck
+                    ? Colors.redAccent
+                    : isStalemate
+                        ? Colors.yellowAccent.withOpacity(.7)
+                        : Colors.transparent,
+        width: 2,
+      );
+
       return Flexible(
         child: GestureDetector(
           onTap: onSquareTap(square, piecePosition),
           child: Container(
-            child: piecePosition != null
-                ? Piece(
-                    pieceInfo: piecePosition.pieceInfo,
-                  )
-                : SizedBox.expand(),
+            child: child,
             decoration: BoxDecoration(
-              color: isLegalMoveSquare
-                  ? piecePosition != null
-                      ? Colors.redAccent
-                      : Colors.purpleAccent[100]
-                  : isCheckmate
-                      ? Colors.redAccent
-                      : isStalemate
-                          ? Colors.yellowAccent
-                          : squareColor,
-              border: Border.all(
-                  color: square == fromSquare
-                      ? Colors.greenAccent
-                      : isCheck
-                          ? Colors.redAccent
-                          : Colors.transparent,
-                  width: 2),
+              color: color,
+              border: border,
             ),
           ),
         ),
