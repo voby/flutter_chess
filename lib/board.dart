@@ -5,6 +5,7 @@ import 'engine/board_history.dart';
 import 'engine/board_init_state.dart';
 import 'engine/enums.dart';
 import 'engine/move_validation.dart';
+import 'engine/piece_info.dart';
 import 'engine/piece_position.dart';
 import 'engine/square.dart';
 import 'piece.dart';
@@ -144,7 +145,58 @@ class _BoardState extends State<Board> {
   }
 
   void completeMove(Square toSquare) {
-    final newState = boardHistory.currentState.addMove(fromSquare, toSquare);
+    final fromPosition = boardHistory.currentState.getPiecePosition(fromSquare);
+    final isPromotion = fromPosition.pieceInfo.type == PieceType.pawn &&
+        [Rank.first, Rank.eighth].contains(toSquare.rank);
+
+    if (isPromotion) {
+      print('Promotion');
+      showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Container(
+              color: Colors.blueGrey,
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  PieceType.queen,
+                  PieceType.knight,
+                  PieceType.bishop,
+                  PieceType.rook
+                ]
+                    .map(
+                      (pieceType) => InkWell(
+                        onTap: () {
+                          _completeMove(toSquare, pieceType);
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          width: 70,
+                          height: 70,
+                          child: Piece(
+                            pieceInfo: PieceInfo(
+                              'id',
+                              fromPosition.pieceInfo.color,
+                              pieceType,
+                            ),
+                            // Colors.green,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+            );
+          });
+    } else {
+      _completeMove(toSquare);
+    }
+  }
+
+  void _completeMove(Square toSquare, [PieceType promotionPiece]) {
+    final newState = boardHistory.currentState
+        .addMove(fromSquare, toSquare, promotionPiece: promotionPiece);
 
     setState(() {
       boardHistory = boardHistory.addState(newState);
@@ -202,6 +254,8 @@ class _BoardState extends State<Board> {
   void setPrevState() {
     if (boardHistory.hasPrevState) {
       setState(() {
+        fromSquare = null;
+        legalMoves = [];
         boardHistory = boardHistory.setPrevState();
       });
     }
@@ -209,6 +263,8 @@ class _BoardState extends State<Board> {
 
   void setNextState() {
     if (boardHistory.hasNextState) {
+      fromSquare = null;
+      legalMoves = [];
       setState(() {
         boardHistory = boardHistory.setNextState();
       });

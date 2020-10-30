@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'enums.dart';
 import 'move.dart';
 import 'move_validation.dart';
+import 'piece_info.dart';
 import 'piece_position.dart';
 import 'square.dart';
 
@@ -28,7 +29,8 @@ class BoardState extends Equatable {
     );
   }
 
-  BoardState addMove(Square fromSquare, Square toSquare) {
+  BoardState addMove(Square fromSquare, Square toSquare,
+      {promotionPiece = PieceType.queen}) {
     final fromPosition = getPiecePosition(fromSquare);
     final toPosition = getPiecePosition(toSquare);
     final move = Move(fromPosition.pieceInfo, fromSquare, toSquare);
@@ -37,6 +39,16 @@ class BoardState extends Equatable {
       ..removeWhere((position) => position == fromPosition)
       ..removeWhere((position) => position == toPosition)
       ..add(PiecePosition(toSquare, fromPosition.pieceInfo));
+
+    // promotion
+    if (fromPosition.pieceInfo.type == PieceType.pawn &&
+        [Rank.first, Rank.eighth].contains(toSquare.rank)) {
+      final newPiece = PieceInfo(
+          'promoted_' + fromPosition.pieceInfo.id, movingColor, promotionPiece);
+      piecePositions
+        ..removeWhere((position) => position.square == toSquare)
+        ..add(PiecePosition(toSquare, newPiece));
+    }
 
     // castle
     final rank = fromPosition.pieceInfo.color == PieceColor.white
