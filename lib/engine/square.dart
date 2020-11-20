@@ -6,7 +6,7 @@ class Square extends Equatable {
   final File file;
   final Rank rank;
 
-  Square(this.file, this.rank);
+  const Square(this.file, this.rank);
 
   factory Square.fromIndexes(int fileIndex, int rankIndex) {
     return Square(File.values[fileIndex], Rank.values[rankIndex]);

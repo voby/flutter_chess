@@ -32,7 +32,7 @@ class _BoardState extends State<Board> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          Container(
+          SizedBox(
             width: screenWidth,
             height: screenWidth,
             child: Row(
@@ -107,7 +107,7 @@ class _BoardState extends State<Board> {
           : isLegalMoveSquare
               ? SizedBox.expand(
                   child: Container(color: Colors.greenAccent.withOpacity(0.3)))
-              : SizedBox.expand();
+              : const SizedBox.expand();
       final color = squareColor;
       final border = Border.all(
         color: piecePosition != null && isLegalMoveSquare
@@ -126,11 +126,11 @@ class _BoardState extends State<Board> {
         child: GestureDetector(
           onTap: onSquareTap(square, piecePosition),
           child: Container(
-            child: child,
             decoration: BoxDecoration(
               color: color,
               border: border,
             ),
+            child: child,
           ),
         ),
       );
@@ -151,12 +151,12 @@ class _BoardState extends State<Board> {
 
     if (isPromotion) {
       print('Promotion');
-      showModalBottomSheet(
+      showModalBottomSheet<Widget>(
           context: context,
           builder: (context) {
             return Container(
               color: Colors.blueGrey,
-              padding: EdgeInsets.symmetric(vertical: 10),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -171,7 +171,7 @@ class _BoardState extends State<Board> {
                           _completeMove(toSquare, pieceType);
                           Navigator.pop(context);
                         },
-                        child: Container(
+                        child: SizedBox(
                           width: 70,
                           height: 70,
                           child: Piece(
@@ -215,10 +215,10 @@ class _BoardState extends State<Board> {
   @override
   void initState() {
     super.initState();
-    boardHistory = BoardHistory([initBoardState]);
+    boardHistory = const BoardHistory([initBoardState]);
   }
 
-  Function onSquareTap(Square square, PiecePosition piecePosition) {
+  VoidCallback onSquareTap(Square square, PiecePosition piecePosition) {
     return () {
       if (piecePosition != null &&
           piecePosition.pieceInfo.color ==

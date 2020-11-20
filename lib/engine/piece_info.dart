@@ -7,7 +7,7 @@ class PieceInfo extends Equatable {
   final PieceColor color;
   final PieceType type;
 
-  PieceInfo(this.id, this.color, this.type);
+  const PieceInfo(this.id, this.color, this.type);
 
   @override
   List<Object> get props => [id];

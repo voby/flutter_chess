@@ -8,7 +8,7 @@ class Move extends Equatable {
   final Square from;
   final Square to;
 
-  Move(this.piece, this.from, this.to);
+  const Move(this.piece, this.from, this.to);
 
   @override
   List<Object> get props => [piece, from, to];

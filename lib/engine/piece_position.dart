@@ -8,7 +8,7 @@ class PiecePosition extends Equatable {
   final PieceInfo pieceInfo;
   final bool init;
 
-  PiecePosition(this.square, this.pieceInfo, {this.init = false});
+  const PiecePosition(this.square, this.pieceInfo, {this.init = false});
 
   @override
   List<Object> get props => [square, pieceInfo, init];

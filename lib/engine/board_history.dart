@@ -4,7 +4,7 @@ class BoardHistory {
   final List<BoardState> _boardStates;
   final int _stateIndex;
 
-  BoardHistory(this._boardStates, {int stateIndex = 0})
+  const BoardHistory(this._boardStates, {int stateIndex = 0})
       : _stateIndex = stateIndex;
 
   BoardState get currentState => _boardStates[_stateIndex];
@@ -40,7 +40,7 @@ class BoardHistory {
   bool get hasResetState => _boardStates.length > 1;
   BoardHistory resetState() {
     if (hasResetState) {
-      return BoardHistory([this._boardStates[0]]);
+      return BoardHistory([_boardStates[0]]);
     }
 
     return this;

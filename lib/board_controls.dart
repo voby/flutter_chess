@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class BoardControls extends StatelessWidget {
-  final Function rotateBoard;
+  final VoidCallback rotateBoard;
   final bool hasRestartGame;
-  final Function restartGame;
+  final VoidCallback restartGame;
   final bool hasNextState;
+  final VoidCallback setNextState;
   final bool hasPrevState;
-  final Function setNextState;
-  final Function setPrevState;
+  final VoidCallback setPrevState;
 
   const BoardControls({
     Key key,
@@ -38,7 +38,7 @@ class BoardControls extends StatelessWidget {
           ),
           InkWell(
             onTap: rotateBoard,
-            child: Icon(Icons.swap_calls, color: Colors.white),
+            child: const Icon(Icons.swap_calls, color: Colors.white),
           ),
           InkWell(
             onTap: setPrevState,

@@ -11,7 +11,7 @@ class BoardState extends Equatable {
   final Move _move;
   final List<PiecePosition> _piecePositions;
 
-  BoardState(this._move, this._piecePositions);
+  const BoardState(this._move, this._piecePositions);
 
   @override
   List<Object> get props => [_move, _piecePositions];
@@ -30,7 +30,7 @@ class BoardState extends Equatable {
   }
 
   BoardState addMove(Square fromSquare, Square toSquare,
-      {promotionPiece = PieceType.queen}) {
+      {PieceType promotionPiece = PieceType.queen}) {
     final fromPosition = getPiecePosition(fromSquare);
     final toPosition = getPiecePosition(toSquare);
     final move = Move(fromPosition.pieceInfo, fromSquare, toSquare);
@@ -44,7 +44,7 @@ class BoardState extends Equatable {
     if (fromPosition.pieceInfo.type == PieceType.pawn &&
         [Rank.first, Rank.eighth].contains(toSquare.rank)) {
       final newPiece = PieceInfo(
-          'promoted_' + fromPosition.pieceInfo.id, movingColor, promotionPiece);
+          'promoted_${fromPosition.pieceInfo.id}', movingColor, promotionPiece);
       piecePositions
         ..removeWhere((position) => position.square == toSquare)
         ..add(PiecePosition(toSquare, newPiece));

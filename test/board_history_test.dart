@@ -5,7 +5,7 @@ import 'package:flutter_chess/engine/square.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  final history0 = BoardHistory([initBoardState]);
+  const history0 = BoardHistory([initBoardState]);
 
   group('Initial state', () {
     test('current state is the latest state', () {
@@ -19,8 +19,8 @@ void main() {
     });
   });
 
-  final state1 = history0.currentState
-      .addMove(Square(File.e, Rank.second), Square(File.e, Rank.fourth));
+  final state1 = history0.currentState.addMove(
+      const Square(File.e, Rank.second), const Square(File.e, Rank.fourth));
   final history1 = history0.addState(state1);
 
   group('After e2e4', () {

@@ -1,6 +1,6 @@
+import 'board_state.dart';
 import 'enums.dart';
 import 'piece_position.dart';
-import 'board_state.dart';
 import 'square.dart';
 
 List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
@@ -16,6 +16,7 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
       final topRightPosition = state.getPiecePosition(topRightSquare);
       final topTopSquare = getOffsetSquare(position.square, rankOffset: 2);
       final topTopPosition = state.getPiecePosition(topTopSquare);
+
       final List<Square> squares = [
         if (topPosition == null) topSquare,
         if (topLeftPosition != null &&
@@ -43,6 +44,7 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
     final topRightPosition = state.getPiecePosition(topRightSquare);
     final topTopSquare = getOffsetSquare(position.square, rankOffset: -2);
     final topTopPosition = state.getPiecePosition(topTopSquare);
+
     final List<Square> squares = [
       if (topPosition == null) topSquare,
       if (topLeftPosition != null &&
@@ -62,17 +64,17 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
 
   if (position.pieceInfo.type == PieceType.king) {
     final whiteKingPosition =
-        state.getPiecePosition(Square(File.e, Rank.first));
+        state.getPiecePosition(const Square(File.e, Rank.first));
     final blackKingPosition =
-        state.getPiecePosition(Square(File.e, Rank.eighth));
+        state.getPiecePosition(const Square(File.e, Rank.eighth));
     final whiteKingsideRookPosition =
-        state.getPiecePosition(Square(File.h, Rank.first));
+        state.getPiecePosition(const Square(File.h, Rank.first));
     final whiteQueensideRookPosition =
-        state.getPiecePosition(Square(File.a, Rank.first));
+        state.getPiecePosition(const Square(File.a, Rank.first));
     final blackKingsideRookPosition =
-        state.getPiecePosition(Square(File.h, Rank.eighth));
+        state.getPiecePosition(const Square(File.h, Rank.eighth));
     final blackQueensideRookPosition =
-        state.getPiecePosition(Square(File.a, Rank.eighth));
+        state.getPiecePosition(const Square(File.a, Rank.eighth));
     final whiteKingNoCheck = !isKingUnderAttack(PieceColor.white, state);
     final blackKingNoCheck = !isKingUnderAttack(PieceColor.black, state);
     final whiteKingNoMove = whiteKingPosition != null && whiteKingPosition.init;
@@ -86,38 +88,38 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
     final blackQueensideRookNoMove =
         blackQueensideRookPosition != null && blackQueensideRookPosition.init;
     final whiteKingsideNoPieces = [
-      Square(File.f, Rank.first),
-      Square(File.g, Rank.first)
+      const Square(File.f, Rank.first),
+      const Square(File.g, Rank.first)
     ].every((square) => state.getPiecePosition(square) == null);
     final whiteQueensideNoPieces = [
-      Square(File.b, Rank.first),
-      Square(File.c, Rank.first),
-      Square(File.d, Rank.first),
+      const Square(File.b, Rank.first),
+      const Square(File.c, Rank.first),
+      const Square(File.d, Rank.first),
     ].every((square) => state.getPiecePosition(square) == null);
     final blackKingsideNoPieces = [
-      Square(File.f, Rank.eighth),
-      Square(File.g, Rank.eighth)
+      const Square(File.f, Rank.eighth),
+      const Square(File.g, Rank.eighth)
     ].every((square) => state.getPiecePosition(square) == null);
     final blackQueensideNoPieces = [
-      Square(File.b, Rank.eighth),
-      Square(File.c, Rank.eighth),
-      Square(File.d, Rank.eighth),
+      const Square(File.b, Rank.eighth),
+      const Square(File.c, Rank.eighth),
+      const Square(File.d, Rank.eighth),
     ].every((square) => state.getPiecePosition(square) == null);
     final whiteKingsideNoCheckSquares = [
-      Square(File.f, Rank.first),
-      Square(File.g, Rank.first)
+      const Square(File.f, Rank.first),
+      const Square(File.g, Rank.first)
     ].every((square) => !isSquareUnderAttack(PieceColor.white, square, state));
     final whiteQueensideNoCheckSquares = [
-      Square(File.c, Rank.first),
-      Square(File.d, Rank.first),
+      const Square(File.c, Rank.first),
+      const Square(File.d, Rank.first),
     ].every((square) => !isSquareUnderAttack(PieceColor.white, square, state));
     final blackKingsideNoCheckSquares = [
-      Square(File.f, Rank.eighth),
-      Square(File.g, Rank.eighth)
+      const Square(File.f, Rank.eighth),
+      const Square(File.g, Rank.eighth)
     ].every((square) => !isSquareUnderAttack(PieceColor.black, square, state));
     final blackQueensideNoCheckSquares = [
-      Square(File.c, Rank.eighth),
-      Square(File.d, Rank.eighth),
+      const Square(File.c, Rank.eighth),
+      const Square(File.d, Rank.eighth),
     ].every((square) => !isSquareUnderAttack(PieceColor.black, square, state));
 
     final whiteKingsideCastle = whiteKingNoCheck &&
@@ -142,18 +144,18 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
         blackQueensideNoCheckSquares;
 
     final List<Square> squares = [
-      getOffsetSquare(position.square, fileOffset: 0, rankOffset: 1),
+      getOffsetSquare(position.square, rankOffset: 1),
       getOffsetSquare(position.square, fileOffset: 1, rankOffset: 1),
-      getOffsetSquare(position.square, fileOffset: 1, rankOffset: 0),
+      getOffsetSquare(position.square, fileOffset: 1),
       getOffsetSquare(position.square, fileOffset: 1, rankOffset: -1),
-      getOffsetSquare(position.square, fileOffset: 0, rankOffset: -1),
+      getOffsetSquare(position.square, rankOffset: -1),
       getOffsetSquare(position.square, fileOffset: -1, rankOffset: -1),
-      getOffsetSquare(position.square, fileOffset: -1, rankOffset: 0),
+      getOffsetSquare(position.square, fileOffset: -1),
       getOffsetSquare(position.square, fileOffset: -1, rankOffset: 1),
-      if (whiteKingsideCastle) Square(File.g, Rank.first),
-      if (whiteQueensideCastle) Square(File.c, Rank.first),
-      if (blackKingsideCastle) Square(File.g, Rank.eighth),
-      if (blackQueensideCastle) Square(File.c, Rank.eighth),
+      if (whiteKingsideCastle) const Square(File.g, Rank.first),
+      if (whiteQueensideCastle) const Square(File.c, Rank.first),
+      if (blackKingsideCastle) const Square(File.g, Rank.eighth),
+      if (blackQueensideCastle) const Square(File.c, Rank.eighth),
     ];
 
     return squares;
@@ -265,7 +267,7 @@ List<Square> getOffsetSquareSeq(BoardState state, Square square,
     ),
   );
 
-  for (Square s in possibleSquares) {
+  for (final Square s in possibleSquares) {
     if (isWhile) {
       final endPosition = state.getPiecePosition(s);
 
