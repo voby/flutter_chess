@@ -73,6 +73,18 @@ class BoardState extends Equatable {
       }
     }
 
+    // en passant
+    if (fromPosition.pieceInfo.type == PieceType.pawn &&
+        [Rank.fifth, Rank.fourth].contains(fromSquare.rank) &&
+        fromSquare.file != toSquare.file &&
+        toPosition == null) {
+      piecePositions
+        ..removeWhere((position) =>
+            position.square ==
+            getOffsetSquare(toSquare,
+                rankOffset: fromSquare.rank == Rank.fifth ? -1 : 1));
+    }
+
     return BoardState(move, piecePositions);
   }
 

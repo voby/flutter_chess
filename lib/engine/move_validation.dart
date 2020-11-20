@@ -16,14 +16,42 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
       final topRightPosition = state.getPiecePosition(topRightSquare);
       final topTopSquare = getOffsetSquare(position.square, rankOffset: 2);
       final topTopPosition = state.getPiecePosition(topTopSquare);
+      final isEnPassant = position.square.rank == Rank.fifth &&
+          state.move.piece.type == PieceType.pawn;
+      final isEnPassantLeft = isEnPassant &&
+          state.move.from ==
+              getOffsetSquare(
+                position.square,
+                fileOffset: -1,
+                rankOffset: 2,
+              ) &&
+          state.move.to ==
+              getOffsetSquare(
+                position.square,
+                fileOffset: -1,
+              );
+      final isEnPassantRight = isEnPassant &&
+          state.move.from ==
+              getOffsetSquare(
+                position.square,
+                fileOffset: 1,
+                rankOffset: 2,
+              ) &&
+          state.move.to ==
+              getOffsetSquare(
+                position.square,
+                fileOffset: 1,
+              );
 
       final List<Square> squares = [
         if (topPosition == null) topSquare,
-        if (topLeftPosition != null &&
-            topLeftPosition.pieceInfo.color != position.pieceInfo.color)
+        if ((topLeftPosition != null &&
+                topLeftPosition.pieceInfo.color != position.pieceInfo.color) ||
+            isEnPassantLeft)
           topLeftSquare,
-        if (topRightPosition != null &&
-            topRightPosition.pieceInfo.color != position.pieceInfo.color)
+        if ((topRightPosition != null &&
+                topRightPosition.pieceInfo.color != position.pieceInfo.color) ||
+            isEnPassantRight)
           topRightSquare,
         if (position.square.rank == Rank.second &&
             topTopPosition == null &&
@@ -44,14 +72,42 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
     final topRightPosition = state.getPiecePosition(topRightSquare);
     final topTopSquare = getOffsetSquare(position.square, rankOffset: -2);
     final topTopPosition = state.getPiecePosition(topTopSquare);
+    final isEnPassant = position.square.rank == Rank.fourth &&
+        state.move.piece.type == PieceType.pawn;
+    final isEnPassantLeft = isEnPassant &&
+        state.move.from ==
+            getOffsetSquare(
+              position.square,
+              fileOffset: -1,
+              rankOffset: -2,
+            ) &&
+        state.move.to ==
+            getOffsetSquare(
+              position.square,
+              fileOffset: -1,
+            );
+    final isEnPassantRight = isEnPassant &&
+        state.move.from ==
+            getOffsetSquare(
+              position.square,
+              fileOffset: 1,
+              rankOffset: -2,
+            ) &&
+        state.move.to ==
+            getOffsetSquare(
+              position.square,
+              fileOffset: 1,
+            );
 
     final List<Square> squares = [
       if (topPosition == null) topSquare,
-      if (topLeftPosition != null &&
-          topLeftPosition.pieceInfo.color != position.pieceInfo.color)
+      if ((topLeftPosition != null &&
+              topLeftPosition.pieceInfo.color != position.pieceInfo.color) ||
+          isEnPassantLeft)
         topLeftSquare,
-      if (topRightPosition != null &&
-          topRightPosition.pieceInfo.color != position.pieceInfo.color)
+      if ((topRightPosition != null &&
+              topRightPosition.pieceInfo.color != position.pieceInfo.color) ||
+          isEnPassantRight)
         topRightSquare,
       if (position.square.rank == Rank.seventh &&
           topTopPosition == null &&
