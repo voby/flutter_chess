@@ -282,6 +282,11 @@ List<Square> _getPieceMoves(PiecePosition position, BoardState state) {
 
 List<Square> getValidMoves(Square fromSquare, BoardState state) {
   final position = state.getPiecePosition(fromSquare);
+
+  if (position == null) {
+    return [];
+  }
+
   final allSquares = _getPieceMoves(position, state);
   final legalSquares = List<Square>.from(allSquares.where((toSquare) {
     return toSquare != null &&

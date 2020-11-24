@@ -6,7 +6,6 @@ import 'engine/board_init_state.dart';
 import 'engine/enums.dart';
 import 'engine/move_validation.dart';
 import 'engine/piece_info.dart';
-import 'engine/piece_position.dart';
 import 'engine/square.dart';
 import 'piece.dart';
 
@@ -32,12 +31,91 @@ class _BoardState extends State<Board> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          SizedBox(
-            width: screenWidth,
-            height: screenWidth,
-            child: Row(
-              children: buildFiles,
-            ),
+          Stack(
+            children: [
+              SizedBox(
+                width: screenWidth,
+                height: screenWidth,
+                child: Row(
+                  children: buildFiles,
+                ),
+              ),
+              ...boardHistory.currentState.getLegalMoves(fromSquare).map(
+                (square) {
+                  return Positioned(
+                    left: screenWidth * square.fileIndex / 8,
+                    bottom: screenWidth * square.rankIndex / 8,
+                    child: GestureDetector(
+                      onTap: onSquareTap(square),
+                      child: Container(
+                        width: screenWidth / 8,
+                        height: screenWidth / 8,
+                        color: Colors.greenAccent.withOpacity(0.3),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              ...boardHistory.currentState.piecePositions.map((piecePosition) {
+                final isLegalMoveSquare =
+                    legalMoves.contains(piecePosition.square);
+
+                final isKing = piecePosition != null &&
+                    piecePosition.pieceInfo.type == PieceType.king &&
+                    piecePosition.pieceInfo.color ==
+                        boardHistory.currentState.movingColor;
+                final isCheck = isKing &&
+                    isSquareUnderAttack(piecePosition.pieceInfo.color,
+                        piecePosition.square, boardHistory.currentState);
+                final isStalemate =
+                    isKing && boardHistory.currentState.isStalemate();
+                final isCheckmate =
+                    isKing && boardHistory.currentState.isCheckmate();
+
+                final border = Border.all(
+                  color: piecePosition != null && isLegalMoveSquare
+                      ? Colors.redAccent.withOpacity(0.7)
+                      : piecePosition.square == fromSquare || isLegalMoveSquare
+                          ? Colors.greenAccent.withOpacity(0.7)
+                          : isCheck
+                              ? Colors.redAccent
+                              : isStalemate
+                                  ? Colors.yellowAccent.withOpacity(.7)
+                                  : Colors.transparent,
+                  width: 2,
+                );
+
+                return AnimatedPositioned(
+                  curve: Curves.fastLinearToSlowEaseIn,
+                  duration: const Duration(milliseconds: 500),
+                  left: screenWidth * piecePosition.square.fileIndex / 8,
+                  bottom: screenWidth * piecePosition.square.rankIndex / 8,
+                  key: Key(piecePosition.pieceInfo.id),
+                  child: GestureDetector(
+                    onTap: onSquareTap(piecePosition.square),
+                    child: Container(
+                      width: screenWidth / 8,
+                      height: screenWidth / 8,
+                      decoration: BoxDecoration(
+                        color: isCheckmate
+                            ? Colors.redAccent.withOpacity(0.8)
+                            : isStalemate
+                                ? Colors.yellowAccent.withOpacity(0.8)
+                                : fromSquare == piecePosition.square
+                                    ? Colors.greenAccent.withOpacity(0.3)
+                                    : isLegalMoveSquare
+                                        ? Colors.redAccent.withOpacity(0.3)
+                                        : null,
+                        border: border,
+                      ),
+                      child: Piece(
+                        pieceInfo: piecePosition.pieceInfo,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
           ),
           BoardControls(
             rotateBoard: rotateBoard,
@@ -73,65 +151,12 @@ class _BoardState extends State<Board> {
         : List.generate(8, (i) => i);
 
     return seed.map((rankIndex) {
-      final square = Square.fromIndexes(fileIndex, rankIndex);
       final squareColor =
           fileIndex % 2 == rankIndex % 2 ? Colors.brown : Colors.brown[100];
-      final PiecePosition piecePosition =
-          boardHistory.currentState.getPiecePosition(square);
-
-      final isLegalMoveSquare = legalMoves.contains(square);
-
-      final isKing = piecePosition != null &&
-          piecePosition.pieceInfo.type == PieceType.king &&
-          piecePosition.pieceInfo.color ==
-              boardHistory.currentState.movingColor;
-      final isCheck = isKing &&
-          isSquareUnderAttack(
-              piecePosition.pieceInfo.color, square, boardHistory.currentState);
-      final isStalemate = isKing && boardHistory.currentState.isStalemate();
-      final isCheckmate = isKing && boardHistory.currentState.isCheckmate();
-
-      final child = piecePosition != null
-          ? Piece(
-              pieceInfo: piecePosition.pieceInfo,
-              containerColor: isCheckmate
-                  ? Colors.redAccent.withOpacity(0.8)
-                  : isStalemate
-                      ? Colors.yellowAccent.withOpacity(0.8)
-                      : fromSquare == square
-                          ? Colors.greenAccent.withOpacity(0.3)
-                          : isLegalMoveSquare
-                              ? Colors.redAccent.withOpacity(0.3)
-                              : null,
-            )
-          : isLegalMoveSquare
-              ? SizedBox.expand(
-                  child: Container(color: Colors.greenAccent.withOpacity(0.3)))
-              : const SizedBox.expand();
-      final color = squareColor;
-      final border = Border.all(
-        color: piecePosition != null && isLegalMoveSquare
-            ? Colors.redAccent.withOpacity(0.7)
-            : square == fromSquare || isLegalMoveSquare
-                ? Colors.greenAccent.withOpacity(0.7)
-                : isCheck
-                    ? Colors.redAccent
-                    : isStalemate
-                        ? Colors.yellowAccent.withOpacity(.7)
-                        : Colors.transparent,
-        width: 2,
-      );
 
       return Flexible(
-        child: GestureDetector(
-          onTap: onSquareTap(square, piecePosition),
-          child: Container(
-            decoration: BoxDecoration(
-              color: color,
-              border: border,
-            ),
-            child: child,
-          ),
+        child: Container(
+          color: squareColor,
         ),
       );
     }).toList();
@@ -218,8 +243,10 @@ class _BoardState extends State<Board> {
     boardHistory = const BoardHistory([initBoardState]);
   }
 
-  VoidCallback onSquareTap(Square square, PiecePosition piecePosition) {
+  VoidCallback onSquareTap(Square square) {
     return () {
+      final piecePosition = boardHistory.currentState.getPiecePosition(square);
+
       if (piecePosition != null &&
           piecePosition.pieceInfo.color ==
               boardHistory.currentState.movingColor) {

@@ -12,6 +12,9 @@ class Square extends Equatable {
     return Square(File.values[fileIndex], Rank.values[rankIndex]);
   }
 
+  int get fileIndex => File.values.indexOf(file);
+  int get rankIndex => Rank.values.indexOf(rank);
+
   @override
   List<Object> get props => [file, rank];
 
