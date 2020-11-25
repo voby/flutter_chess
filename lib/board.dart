@@ -42,9 +42,24 @@ class _BoardState extends State<Board> {
               ),
               ...boardHistory.currentState.getLegalMoves(fromSquare).map(
                 (square) {
+                  final left = focusSide == PieceColor.white
+                      ? screenWidth * square.fileIndex / 8
+                      : null;
+                  final bottom = focusSide == PieceColor.white
+                      ? screenWidth * square.rankIndex / 8
+                      : null;
+                  final right = focusSide != PieceColor.white
+                      ? screenWidth * square.fileIndex / 8
+                      : null;
+                  final top = focusSide != PieceColor.white
+                      ? screenWidth * square.rankIndex / 8
+                      : null;
+
                   return Positioned(
-                    left: screenWidth * square.fileIndex / 8,
-                    bottom: screenWidth * square.rankIndex / 8,
+                    left: left,
+                    bottom: bottom,
+                    right: right,
+                    top: top,
                     child: GestureDetector(
                       onTap: onSquareTap(square),
                       child: Container(
@@ -85,12 +100,25 @@ class _BoardState extends State<Board> {
                   width: 2,
                 );
 
+                final left = focusSide == PieceColor.white
+                    ? screenWidth * piecePosition.square.fileIndex / 8
+                    : screenWidth -
+                        (screenWidth *
+                            (piecePosition.square.fileIndex + 1) /
+                            8);
+                final bottom = focusSide == PieceColor.white
+                    ? screenWidth * piecePosition.square.rankIndex / 8
+                    : screenWidth -
+                        (screenWidth *
+                            (piecePosition.square.rankIndex + 1) /
+                            8);
+
                 return AnimatedPositioned(
                   curve: Curves.fastLinearToSlowEaseIn,
                   duration: const Duration(milliseconds: 500),
-                  left: screenWidth * piecePosition.square.fileIndex / 8,
-                  bottom: screenWidth * piecePosition.square.rankIndex / 8,
-                  key: Key(piecePosition.pieceInfo.id),
+                  left: left,
+                  bottom: bottom,
+                  key: Key(piecePosition.pieceInfo.id + focusSide.toString()),
                   child: GestureDetector(
                     onTap: onSquareTap(piecePosition.square),
                     child: Container(
