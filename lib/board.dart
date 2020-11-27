@@ -9,16 +9,16 @@ import 'engine/piece_info.dart';
 import 'engine/square.dart';
 import 'piece.dart';
 
-class Board extends StatefulWidget {
-  const Board({
+class Room extends StatefulWidget {
+  const Room({
     Key key,
   }) : super(key: key);
 
   @override
-  _BoardState createState() => _BoardState();
+  _RoomState createState() => _RoomState();
 }
 
-class _BoardState extends State<Board> {
+class _RoomState extends State<Room> {
   BoardHistory boardHistory;
   Square fromSquare;
   List<Square> legalMoves = [];
@@ -33,116 +33,130 @@ class _BoardState extends State<Board> {
         children: [
           Stack(
             children: [
+              BoardLayer(screenWidth: screenWidth, buildFiles: buildFiles),
               SizedBox(
                 width: screenWidth,
                 height: screenWidth,
-                child: Row(
-                  children: buildFiles,
+                child: Stack(
+                  children: [
+                    ...boardHistory.currentState.getLegalMoves(fromSquare).map(
+                      (square) {
+                        final left = focusSide == PieceColor.white
+                            ? screenWidth * square.fileIndex / 8
+                            : null;
+                        final bottom = focusSide == PieceColor.white
+                            ? screenWidth * square.rankIndex / 8
+                            : null;
+                        final right = focusSide != PieceColor.white
+                            ? screenWidth * square.fileIndex / 8
+                            : null;
+                        final top = focusSide != PieceColor.white
+                            ? screenWidth * square.rankIndex / 8
+                            : null;
+
+                        return Positioned(
+                          left: left,
+                          bottom: bottom,
+                          right: right,
+                          top: top,
+                          child: GestureDetector(
+                            onTap: onSquareTap(square),
+                            child: Container(
+                              width: screenWidth / 8,
+                              height: screenWidth / 8,
+                              color: Colors.greenAccent.withOpacity(0.3),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ),
-              ...boardHistory.currentState.getLegalMoves(fromSquare).map(
-                (square) {
-                  final left = focusSide == PieceColor.white
-                      ? screenWidth * square.fileIndex / 8
-                      : null;
-                  final bottom = focusSide == PieceColor.white
-                      ? screenWidth * square.rankIndex / 8
-                      : null;
-                  final right = focusSide != PieceColor.white
-                      ? screenWidth * square.fileIndex / 8
-                      : null;
-                  final top = focusSide != PieceColor.white
-                      ? screenWidth * square.rankIndex / 8
-                      : null;
+              SizedBox(
+                width: screenWidth,
+                height: screenWidth,
+                child: Stack(
+                  children: [
+                    ...boardHistory.currentState.piecePositions
+                        .map((piecePosition) {
+                      final isLegalMoveSquare =
+                          legalMoves.contains(piecePosition.square);
 
-                  return Positioned(
-                    left: left,
-                    bottom: bottom,
-                    right: right,
-                    top: top,
-                    child: GestureDetector(
-                      onTap: onSquareTap(square),
-                      child: Container(
-                        width: screenWidth / 8,
-                        height: screenWidth / 8,
-                        color: Colors.greenAccent.withOpacity(0.3),
-                      ),
-                    ),
-                  );
-                },
+                      final isKing = piecePosition != null &&
+                          piecePosition.pieceInfo.type == PieceType.king &&
+                          piecePosition.pieceInfo.color ==
+                              boardHistory.currentState.movingColor;
+                      final isCheck = isKing &&
+                          isSquareUnderAttack(piecePosition.pieceInfo.color,
+                              piecePosition.square, boardHistory.currentState);
+                      final isStalemate =
+                          isKing && boardHistory.currentState.isStalemate();
+                      final isCheckmate =
+                          isKing && boardHistory.currentState.isCheckmate();
+
+                      final border = Border.all(
+                        color: piecePosition != null && isLegalMoveSquare
+                            ? Colors.redAccent.withOpacity(0.7)
+                            : piecePosition.square == fromSquare ||
+                                    isLegalMoveSquare
+                                ? Colors.greenAccent.withOpacity(0.7)
+                                : isCheck
+                                    ? Colors.redAccent
+                                    : isStalemate
+                                        ? Colors.yellowAccent.withOpacity(.7)
+                                        : Colors.transparent,
+                        width: 2,
+                      );
+
+                      final left = focusSide == PieceColor.white
+                          ? screenWidth * piecePosition.square.fileIndex / 8
+                          : screenWidth -
+                              (screenWidth *
+                                  (piecePosition.square.fileIndex + 1) /
+                                  8);
+                      final bottom = focusSide == PieceColor.white
+                          ? screenWidth * piecePosition.square.rankIndex / 8
+                          : screenWidth -
+                              (screenWidth *
+                                  (piecePosition.square.rankIndex + 1) /
+                                  8);
+
+                      return AnimatedPositioned(
+                        curve: Curves.fastLinearToSlowEaseIn,
+                        duration: const Duration(milliseconds: 500),
+                        left: left,
+                        bottom: bottom,
+                        key: Key(
+                            piecePosition.pieceInfo.id + focusSide.toString()),
+                        child: GestureDetector(
+                          onTap: onSquareTap(piecePosition.square),
+                          child: Container(
+                            width: screenWidth / 8,
+                            height: screenWidth / 8,
+                            decoration: BoxDecoration(
+                              color: isCheckmate
+                                  ? Colors.redAccent.withOpacity(0.8)
+                                  : isStalemate
+                                      ? Colors.yellowAccent.withOpacity(0.8)
+                                      : fromSquare == piecePosition.square
+                                          ? Colors.greenAccent.withOpacity(0.3)
+                                          : isLegalMoveSquare
+                                              ? Colors.redAccent
+                                                  .withOpacity(0.3)
+                                              : null,
+                              border: border,
+                            ),
+                            child: Piece(
+                              pieceInfo: piecePosition.pieceInfo,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
               ),
-              ...boardHistory.currentState.piecePositions.map((piecePosition) {
-                final isLegalMoveSquare =
-                    legalMoves.contains(piecePosition.square);
-
-                final isKing = piecePosition != null &&
-                    piecePosition.pieceInfo.type == PieceType.king &&
-                    piecePosition.pieceInfo.color ==
-                        boardHistory.currentState.movingColor;
-                final isCheck = isKing &&
-                    isSquareUnderAttack(piecePosition.pieceInfo.color,
-                        piecePosition.square, boardHistory.currentState);
-                final isStalemate =
-                    isKing && boardHistory.currentState.isStalemate();
-                final isCheckmate =
-                    isKing && boardHistory.currentState.isCheckmate();
-
-                final border = Border.all(
-                  color: piecePosition != null && isLegalMoveSquare
-                      ? Colors.redAccent.withOpacity(0.7)
-                      : piecePosition.square == fromSquare || isLegalMoveSquare
-                          ? Colors.greenAccent.withOpacity(0.7)
-                          : isCheck
-                              ? Colors.redAccent
-                              : isStalemate
-                                  ? Colors.yellowAccent.withOpacity(.7)
-                                  : Colors.transparent,
-                  width: 2,
-                );
-
-                final left = focusSide == PieceColor.white
-                    ? screenWidth * piecePosition.square.fileIndex / 8
-                    : screenWidth -
-                        (screenWidth *
-                            (piecePosition.square.fileIndex + 1) /
-                            8);
-                final bottom = focusSide == PieceColor.white
-                    ? screenWidth * piecePosition.square.rankIndex / 8
-                    : screenWidth -
-                        (screenWidth *
-                            (piecePosition.square.rankIndex + 1) /
-                            8);
-
-                return AnimatedPositioned(
-                  curve: Curves.fastLinearToSlowEaseIn,
-                  duration: const Duration(milliseconds: 500),
-                  left: left,
-                  bottom: bottom,
-                  key: Key(piecePosition.pieceInfo.id + focusSide.toString()),
-                  child: GestureDetector(
-                    onTap: onSquareTap(piecePosition.square),
-                    child: Container(
-                      width: screenWidth / 8,
-                      height: screenWidth / 8,
-                      decoration: BoxDecoration(
-                        color: isCheckmate
-                            ? Colors.redAccent.withOpacity(0.8)
-                            : isStalemate
-                                ? Colors.yellowAccent.withOpacity(0.8)
-                                : fromSquare == piecePosition.square
-                                    ? Colors.greenAccent.withOpacity(0.3)
-                                    : isLegalMoveSquare
-                                        ? Colors.redAccent.withOpacity(0.3)
-                                        : null,
-                        border: border,
-                      ),
-                      child: Piece(
-                        pieceInfo: piecePosition.pieceInfo,
-                      ),
-                    ),
-                  ),
-                );
-              }),
             ],
           ),
           BoardControls(
@@ -357,5 +371,27 @@ class _BoardState extends State<Board> {
         boardHistory = boardHistory.setNextState();
       });
     }
+  }
+}
+
+class BoardLayer extends StatelessWidget {
+  const BoardLayer({
+    Key key,
+    @required this.screenWidth,
+    @required this.buildFiles,
+  }) : super(key: key);
+
+  final double screenWidth;
+  final List<Widget> buildFiles;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: screenWidth,
+      height: screenWidth,
+      child: Row(
+        children: buildFiles,
+      ),
+    );
   }
 }

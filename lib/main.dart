@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
           title: const Text('Chess'),
         ),
         backgroundColor: Colors.blueGrey,
-        body: const Board(),
+        body: const Room(),
       ),
     );
   }
