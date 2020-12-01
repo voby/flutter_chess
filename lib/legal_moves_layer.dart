@@ -1,46 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'engine/board_history.dart';
 import 'engine/enums.dart';
-import 'engine/square.dart';
+import 'room.dart';
 
-class LegalMovesLayer extends StatelessWidget {
-  final List<Square> legalMoves;
-  final Square fromSquare;
-  final PieceColor focusSide;
-  final BoardHistory boardHistory;
-  final double screenWidth;
-  final VoidCallback Function(Square) onSquareTap;
-
+class LegalMovesLayer extends ConsumerWidget {
   const LegalMovesLayer({
     Key key,
-    @required this.legalMoves,
-    @required this.fromSquare,
-    @required this.focusSide,
-    @required this.boardHistory,
-    @required this.screenWidth,
-    @required this.onSquareTap,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
+    final state = watch(roomBlockProvider.state);
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return SizedBox(
       width: screenWidth,
       height: screenWidth,
       child: Stack(
         children: [
-          ...boardHistory.currentState.getLegalMoves(fromSquare).map(
+          ...state.boardHistory.currentState
+              .getLegalMoves(state.fromSquare)
+              .map(
             (square) {
-              final left = focusSide == PieceColor.white
+              final left = state.focusSide == PieceColor.white
                   ? screenWidth * square.fileIndex / 8
                   : null;
-              final bottom = focusSide == PieceColor.white
+              final bottom = state.focusSide == PieceColor.white
                   ? screenWidth * square.rankIndex / 8
                   : null;
-              final right = focusSide != PieceColor.white
+              final right = state.focusSide != PieceColor.white
                   ? screenWidth * square.fileIndex / 8
                   : null;
-              final top = focusSide != PieceColor.white
+              final top = state.focusSide != PieceColor.white
                   ? screenWidth * square.rankIndex / 8
                   : null;
 
@@ -50,7 +42,11 @@ class LegalMovesLayer extends StatelessWidget {
                 right: right,
                 top: top,
                 child: GestureDetector(
-                  onTap: onSquareTap(square),
+                  onTap: () {
+                    context
+                        .read(roomBlockProvider)
+                        .completeMove(square, context);
+                  },
                   child: Container(
                     width: screenWidth / 8,
                     height: screenWidth / 8,

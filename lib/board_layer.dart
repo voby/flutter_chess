@@ -1,44 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'engine/enums.dart';
+import 'room.dart';
+import 'room_state.dart';
 
-class BoardLayer extends StatelessWidget {
+class BoardLayer extends ConsumerWidget {
   const BoardLayer({
     Key key,
-    @required this.focusSide,
   }) : super(key: key);
 
-  final PieceColor focusSide;
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
+    final state = watch(roomBlockProvider.state);
     final screenWidth = MediaQuery.of(context).size.width;
 
     return SizedBox(
       width: screenWidth,
       height: screenWidth,
       child: Row(
-        children: buildFiles(context),
+        children: buildFiles(context, state),
       ),
     );
   }
 
-  List<Widget> buildFiles(BuildContext context) {
-    final seed = focusSide == PieceColor.white
+  List<Widget> buildFiles(BuildContext context, RoomState state) {
+    final seed = state.focusSide == PieceColor.white
         ? List.generate(8, (i) => i)
         : List.generate(8, (i) => i).reversed;
 
     return seed.map((fileIndex) {
       return Flexible(
         child: Column(
-          children: buildSquares(context, fileIndex),
+          children: buildSquares(context, fileIndex, state),
         ),
       );
     }).toList();
   }
 
-  List<Widget> buildSquares(BuildContext context, int fileIndex) {
-    final seed = focusSide == PieceColor.white
+  List<Widget> buildSquares(
+      BuildContext context, int fileIndex, RoomState state) {
+    final seed = state.focusSide == PieceColor.white
         ? List.generate(8, (i) => i).reversed
         : List.generate(8, (i) => i);
 
@@ -55,7 +57,9 @@ class BoardLayer extends StatelessWidget {
         height: size,
         child: Stack(
           children: [
-            if (focusSide == PieceColor.white ? fileIndex == 7 : fileIndex == 0)
+            if (state.focusSide == PieceColor.white
+                ? fileIndex == 7
+                : fileIndex == 0)
               Positioned(
                 top: 1,
                 right: 1,
@@ -68,7 +72,9 @@ class BoardLayer extends StatelessWidget {
                   ),
                 ),
               ),
-            if (focusSide == PieceColor.white ? rankIndex == 0 : rankIndex == 7)
+            if (state.focusSide == PieceColor.white
+                ? rankIndex == 0
+                : rankIndex == 7)
               Positioned(
                 bottom: 1,
                 left: 1,

@@ -1,27 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BoardControls extends StatelessWidget {
-  final VoidCallback rotateBoard;
-  final bool hasRestartGame;
-  final VoidCallback restartGame;
-  final bool hasNextState;
-  final VoidCallback setNextState;
-  final bool hasPrevState;
-  final VoidCallback setPrevState;
+import 'room.dart';
 
+class BoardControls extends ConsumerWidget {
   const BoardControls({
     Key key,
-    this.rotateBoard,
-    this.hasRestartGame,
-    this.restartGame,
-    this.hasNextState,
-    this.hasPrevState,
-    this.setNextState,
-    this.setPrevState,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, ScopedReader watch) {
+    final state = watch(roomBlockProvider.state);
+
     return Container(
       color: Colors.black54,
       height: 60,
@@ -30,28 +20,34 @@ class BoardControls extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           InkWell(
-            onTap: restartGame,
+            onTap: context.read(roomBlockProvider).restartGame,
             child: Icon(
               Icons.menu,
-              color: hasRestartGame ? Colors.white : Colors.white38,
+              color: state.boardHistory.hasResetState
+                  ? Colors.white
+                  : Colors.white38,
             ),
           ),
           InkWell(
-            onTap: rotateBoard,
+            onTap: context.read(roomBlockProvider).rotateBoard,
             child: const Icon(Icons.swap_calls, color: Colors.white),
           ),
           InkWell(
-            onTap: setPrevState,
+            onTap: context.read(roomBlockProvider).setPrevState,
             child: Icon(
               Icons.arrow_back,
-              color: hasPrevState ? Colors.white : Colors.white38,
+              color: state.boardHistory.hasPrevState
+                  ? Colors.white
+                  : Colors.white38,
             ),
           ),
           InkWell(
-            onTap: setNextState,
+            onTap: context.read(roomBlockProvider).setNextState,
             child: Icon(
               Icons.arrow_forward,
-              color: hasNextState ? Colors.white : Colors.white38,
+              color: state.boardHistory.hasNextState
+                  ? Colors.white
+                  : Colors.white38,
             ),
           ),
         ],
