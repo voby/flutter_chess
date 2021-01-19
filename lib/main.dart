@@ -18,12 +18,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Chess'),
-        ),
+      home: const Scaffold(
+        // appBar: AppBar(
+        //   title: const Text('Chess'),
+        // ),
         backgroundColor: Colors.blueGrey,
-        body: const Room(),
+        body: Room(),
       ),
     );
   }

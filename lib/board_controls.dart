@@ -14,7 +14,7 @@ class BoardControls extends ConsumerWidget {
 
     return Container(
       color: Colors.black54,
-      height: 60,
+      height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 40),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

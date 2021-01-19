@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/all.dart';
 
 import 'board_controls.dart';
 import 'board_layer.dart';
+import 'game_info.dart';
 import 'legal_moves_layer.dart';
 import 'piece_layer.dart';
 import 'room_bloc.dart';
@@ -14,19 +15,19 @@ class Room extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          Stack(
-            children: const [
-              BoardLayer(),
-              LegalMovesLayer(),
-              PieceLayer(),
-            ],
-          ),
-          const BoardControls(),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        const GameInfo(),
+        Stack(
+          children: const [
+            BoardLayer(),
+            LegalMovesLayer(),
+            PieceLayer(),
+          ],
+        ),
+        const BoardControls(),
+      ],
     );
   }
 }
