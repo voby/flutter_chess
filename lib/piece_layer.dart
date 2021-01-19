@@ -66,7 +66,9 @@ class PieceLayer extends ConsumerWidget {
               duration: const Duration(milliseconds: 500),
               left: left,
               bottom: bottom,
-              key: Key(piecePosition.pieceInfo.id + state.focusSide.toString()),
+              key: Key(piecePosition.pieceInfo.id +
+                  state.focusSide
+                      .toString()), // disabling board rotate animation
               child: GestureDetector(
                 onTap: context
                     .read(roomBlockProvider)

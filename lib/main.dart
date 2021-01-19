@@ -19,9 +19,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blueGrey,
       ),
       home: const Scaffold(
-        // appBar: AppBar(
-        //   title: const Text('Chess'),
-        // ),
         backgroundColor: Colors.blueGrey,
         body: Room(),
       ),
